@@ -53,7 +53,7 @@ export default function ContactSection({
         {/* Main Hero Content: Clean, focused, matching Power Cables hero */}
         <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center py-20 sm:py-28 flex flex-col items-center justify-center">
           
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-sans font-bold tracking-tight text-white mb-6 drop-shadow-md leading-[1.08]">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-bold tracking-tight text-white mb-6 drop-shadow-md leading-[1.08]">
             Get In Touch With <br />
             <span className="text-[#f4ebe1]">Our Team</span>
           </h1>
@@ -77,12 +77,12 @@ export default function ContactSection({
       >
         {/* Giant Background Watermark "Contact" */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 select-none pointer-events-none opacity-25">
-          <span className="font-sans text-[120px] sm:text-[220px] lg:text-[290px] font-black text-white tracking-tighter leading-none">
+          <span className="font-sans text-[80px] sm:text-[180px] lg:text-[260px] font-black text-white tracking-tighter leading-none">
             Contact
           </span>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12">
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-8 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             
             {/* Left Column matching contact us 2.jpg & contact us.jpg */}
@@ -202,7 +202,7 @@ export default function ContactSection({
             </div>
 
             {/* Right Column: Underline Form matching contact us 2.jpg with 100% visible text */}
-            <div className="lg:col-span-7 bg-white/80 backdrop-blur-md p-8 sm:p-12 rounded-3xl border border-neutral-300 shadow-md">
+            <div className="lg:col-span-7 bg-white/80 backdrop-blur-md p-5 sm:p-8 md:p-12 rounded-3xl border border-neutral-300 shadow-md">
               {submitted ? (
                 <div className="py-16 text-center space-y-4">
                   <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />

@@ -19,7 +19,7 @@ export default function Footer({ onNavigate, onOpenTrackQuote }) {
   const email = "mikewillmakeit2004@gmail.com";
 
   return (
-    <footer className="w-full bg-white border-t border-neutral-300 pt-16 sm:pt-20 pb-8 px-6 sm:px-10 lg:px-16 font-sans select-none overflow-hidden text-neutral-900">
+    <footer className="w-full bg-white border-t border-neutral-300 pt-12 sm:pt-20 pb-8 px-4 sm:px-10 lg:px-16 font-sans select-none overflow-hidden text-neutral-900">
       
       {/* Top Grid */}
       <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 pb-12">
@@ -150,13 +150,13 @@ export default function Footer({ onNavigate, onOpenTrackQuote }) {
 
       {/* Center Giant Geometric Brand Typography */}
       <div className="w-full py-6 sm:py-8 text-center overflow-hidden">
-        <span className="font-sans font-black text-7xl sm:text-9xl md:text-[140px] lg:text-[180px] xl:text-[220px] tracking-tighter text-[#18181b] leading-none inline-block select-none opacity-90">
+        <span className="font-sans font-black text-5xl sm:text-8xl md:text-[130px] lg:text-[180px] xl:text-[220px] tracking-tighter text-[#18181b] leading-none inline-block select-none opacity-90">
           kadianga
         </span>
       </div>
 
       {/* Bottom Row */}
-      <div className="w-full flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-neutral-300 text-xs sm:text-sm text-neutral-700 font-medium gap-3">
+      <div className="w-full flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-neutral-300 text-xs sm:text-sm text-neutral-700 font-medium gap-3 text-center sm:text-left">
         <div className="flex items-center gap-3">
           <span>Kadianga Electricals ©2026</span>
           <span>·</span>

@@ -121,7 +121,7 @@ export default function CartQuotation({
       
       {/* Outer White Card matching cart to request quotation.jpg */}
       <div 
-        className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-6 sm:p-10 my-auto border border-neutral-200 overflow-hidden"
+        className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-4 sm:p-8 lg:p-10 my-auto border border-neutral-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -206,7 +206,7 @@ export default function CartQuotation({
                     
                     {/* Product Code & Image */}
                     <div className="col-span-6 flex items-center gap-3 min-w-0 pr-2">
-                      <div className="w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 flex items-center justify-center p-1 border border-neutral-200/80">
+                      <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 flex items-center justify-center p-1 border border-neutral-200/80">
                         <img 
                           src={item.image_url} 
                           alt={item.name} 
@@ -229,7 +229,7 @@ export default function CartQuotation({
 
                     {/* Quantity Stepper pill: "+  4  -" */}
                     <div className="col-span-3 flex justify-center">
-                      <div className="flex items-center gap-2 border border-neutral-300 rounded-full px-2.5 py-1 bg-white text-xs shadow-sm">
+                      <div className="flex items-center gap-1.5 sm:gap-2 border border-neutral-300 rounded-full px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-white text-[11px] sm:text-xs shadow-sm">
                         <button
                           type="button"
                           onClick={() => onUpdateQuantity(item.id, (item.quantity || 1) + 1)}
@@ -254,7 +254,7 @@ export default function CartQuotation({
 
                     {/* Total Price */}
                     <div className="col-span-2 text-right">
-                      <span className="font-bold text-neutral-900 block font-mono text-xs sm:text-sm">
+                      <span className="font-bold text-neutral-900 block font-mono text-[11px] sm:text-sm">
                         KSh {((item.base_estimate_price || 0) * (item.quantity || 1)).toLocaleString()}
                       </span>
                     </div>

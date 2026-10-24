@@ -74,7 +74,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, shop
           <X className="w-5 h-5" />
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-10 p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-10 p-4 sm:p-8 max-h-[90vh] overflow-y-auto">
           
           {/* Left Column: Amazon/Alibaba Image Showcase with interactive thumbnails */}
           <div className="md:col-span-5 flex flex-col">
@@ -160,7 +160,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, shop
               {/* Price / Quote indicator */}
               <div className="bg-[#faf9f6] p-3.5 rounded-2xl border border-neutral-200/80 mb-5">
                 <span className="text-xs text-neutral-800 font-bold block">Pricing Structure:</span>
-                <div className="flex items-baseline gap-2">
+                <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
                   <span className="text-2xl font-bold text-neutral-900">
                     {product.base_estimate_price > 0 ? `KSh ${Number(product.base_estimate_price).toLocaleString()}` : 'Wholesale Quotation'}
                   </span>
@@ -183,9 +183,9 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, shop
                   </h4>
                   <div className="bg-neutral-50 rounded-xl border border-neutral-200/70 overflow-hidden divide-y divide-neutral-200/70 text-xs">
                     {Object.entries(parsedSpecs).map(([key, val]) => (
-                      <div key={key} className="grid grid-cols-12 px-3 py-2">
+                      <div key={key} className="grid grid-cols-12 px-3 py-2 text-[11px] sm:text-xs">
                         <span className="col-span-5 text-neutral-700 font-bold">{key}</span>
-                        <span className="col-span-7 text-neutral-900 font-semibold">{String(val)}</span>
+                        <span className="col-span-7 text-neutral-900 font-semibold break-words">{String(val)}</span>
                       </div>
                     ))}
                   </div>
@@ -208,7 +208,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, shop
               </div>
 
               {/* Quantity Stepper */}
-              <div className="flex items-center gap-4 mb-6">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
                 <span className="text-xs font-bold text-neutral-800">Quantity:</span>
                 <div className="flex items-center border border-neutral-300 rounded-full bg-white px-2 py-1 shadow-sm">
                   <button

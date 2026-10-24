@@ -17,10 +17,10 @@ export default function HeroHome({ onGetStarted }) {
       </div>
 
       {/* Main Hero Content matching home hero section.jpg */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 text-center flex flex-col items-center pt-16 pb-24">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 text-center flex flex-col items-center pt-12 sm:pt-16 pb-20 sm:pb-24">
 
         {/* Hero Title matching inspo */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-sans font-bold tracking-tight text-white mb-4 max-w-4xl drop-shadow-md">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-bold tracking-tight text-white mb-4 max-w-4xl drop-shadow-md">
           Build your dream home
         </h1>
 
@@ -39,7 +39,7 @@ export default function HeroHome({ onGetStarted }) {
         </button>
 
         {/* Frosted Glass Bottom Stats Bar matching home hero section.jpg */}
-        <div className="mt-20 w-full max-w-4xl bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-2xl border border-white/15 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/10 text-white">
+        <div className="mt-20 w-full max-w-4xl bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-2xl border border-white/15 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-white">
           
           {/* Stat 1: 4.8 Rating */}
           <div className="flex items-center justify-center gap-2 pt-2 sm:pt-0">

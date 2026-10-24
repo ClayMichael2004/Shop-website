@@ -38,20 +38,20 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-neutral-300 text-neutral-900 shadow-sm transition-all">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-4 sm:gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-2 sm:gap-6">
         
         {/* Left: Brand Logo */}
         <div 
           onClick={() => handleNavClick('home')} 
-          className="flex items-center gap-3 cursor-pointer group select-none shrink-0"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none shrink-0"
         >
-          <div className="w-10 h-10 rounded-xl bg-[#18181b] group-hover:bg-[#e67e22] flex items-center justify-center text-white font-bold text-sm tracking-wider transition-colors shadow-sm">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#18181b] group-hover:bg-[#e67e22] flex items-center justify-center text-white font-bold text-xs sm:text-sm tracking-wider transition-colors shadow-sm">
             KE
           </div>
           <div>
-            <span className="font-serif tracking-wider text-xl font-bold text-[#18181b] flex items-center gap-1.5">
+            <span className="font-serif tracking-wider text-lg sm:text-xl font-bold text-[#18181b] flex items-center gap-1 sm:gap-1.5">
               KADIANGA
-              <span className="text-xs uppercase font-sans font-bold tracking-widest text-[#e67e22]">
+              <span className="text-[10px] sm:text-xs uppercase font-sans font-bold tracking-widest text-[#e67e22]">
                 Electricals
               </span>
             </span>
@@ -99,12 +99,12 @@ export default function Navbar({
         </div>
 
         {/* Right: Actions (Track Quote + Quotation Cart) */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           
           {/* Track Quote Button */}
           <button
             onClick={onOpenTrackQuote}
-            className="flex items-center gap-1.5 bg-white hover:bg-neutral-100 active:scale-95 transition-all text-neutral-900 px-3.5 py-2.5 rounded-full border border-neutral-300 text-xs font-bold shadow-sm"
+            className="flex items-center gap-1.5 bg-white hover:bg-neutral-100 active:scale-95 transition-all text-neutral-900 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-full border border-neutral-300 text-xs font-bold shadow-sm"
             title="Track status of a submitted quotation"
           >
             <FileText className="w-4 h-4 text-neutral-800" />
@@ -115,7 +115,7 @@ export default function Navbar({
           <button
             onClick={onOpenCart}
             aria-label="View Quotation Cart"
-            className="flex items-center gap-2 bg-[#18181b] hover:bg-[#e67e22] active:scale-95 transition-all text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-sm"
+            className="flex items-center gap-2 bg-[#18181b] hover:bg-[#e67e22] active:scale-95 transition-all text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs font-bold shadow-sm"
           >
             <ShoppingBag className="w-4 h-4 text-white" />
             <span className="hidden sm:inline">Quotation Cart</span>

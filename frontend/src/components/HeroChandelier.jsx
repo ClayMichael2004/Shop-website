@@ -20,7 +20,7 @@ export default function HeroChandelier({ onExplore }) {
     <section className="relative w-full min-h-[85vh] bg-white flex flex-col justify-between overflow-hidden border-b border-neutral-200/60">
       
       {/* Top Tagline matching chandelier editorial aesthetic */}
-      <div className="w-full max-w-7xl mx-auto flex items-center justify-between px-6 sm:px-8 lg:px-12 pt-8">
+      <div className="w-full max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-8 lg:px-12 pt-6 sm:pt-8">
         <span className="text-xs uppercase tracking-widest font-semibold text-neutral-400">
           Curated Lighting &bull; 2026 Collection
         </span>
@@ -30,12 +30,12 @@ export default function HeroChandelier({ onExplore }) {
       </div>
 
       {/* Main Grid: Left Typography + Right Photo + Right Social Strip */}
-      <div className="flex-1 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 items-center px-6 sm:px-8 lg:px-12 py-8">
+      <div className="flex-1 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 items-center px-4 sm:px-8 lg:px-12 py-6 sm:py-8">
         
         {/* Left Column (Editorial Serif matching inspo) */}
         <div className="lg:col-span-6 flex flex-col justify-center max-w-lg">
           
-          <h2 className="font-serif leading-[0.95] text-5xl sm:text-7xl lg:text-8xl tracking-tight mb-8">
+          <h2 className="font-serif leading-[0.95] text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight mb-6 sm:mb-8">
             <span className="text-[#a4998e] font-serif font-normal block mb-1">
               unique
             </span>
@@ -85,7 +85,7 @@ export default function HeroChandelier({ onExplore }) {
       </div>
 
       {/* Bottom Bar: "scroll down for more" + prev/next square buttons */}
-      <div className="w-full max-w-7xl mx-auto flex items-end justify-between px-6 sm:px-8 lg:px-12 pb-8">
+      <div className="w-full max-w-7xl mx-auto flex items-end justify-between px-4 sm:px-8 lg:px-12 pb-6 sm:pb-8">
         
         {/* Bottom Left text matching inspo */}
         <div className="text-xs text-neutral-400 font-light tracking-wider">
@@ -96,7 +96,7 @@ export default function HeroChandelier({ onExplore }) {
         <div className="flex items-center">
           <button
             onClick={handlePrev}
-            className="w-16 h-16 bg-[#eee7de] hover:bg-[#e4dcce] text-xs font-light text-neutral-800 flex items-center justify-center tracking-wider transition-colors"
+            className="w-12 h-12 sm:w-16 sm:h-16 bg-[#eee7de] hover:bg-[#e4dcce] text-xs font-light text-neutral-800 flex items-center justify-center tracking-wider transition-colors"
             aria-label="Previous slide"
           >
             prev

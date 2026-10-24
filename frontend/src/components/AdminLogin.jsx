@@ -115,11 +115,11 @@ export default function AdminLogin({ onLoginSuccess, onCancel, defaultEmail = "a
         </div>
 
         {/* Main Content Area (2-column layout matching login.jpg) */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center p-6 sm:p-12 lg:p-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center p-4 sm:p-8 lg:p-16">
           
           {/* Left Column: Security Illustration matching login.jpg */}
           <div className="md:col-span-6 flex items-center justify-center p-6">
-            <div className="relative w-64 h-64 flex items-center justify-center select-none">
+            <div className="relative w-44 h-44 sm:w-64 sm:h-64 flex items-center justify-center select-none">
               
               {/* Central Circle with Orbiting Satellite Dot */}
               <div className="relative w-36 h-36 rounded-full border-[3px] border-[#6b7280] flex items-center justify-center">

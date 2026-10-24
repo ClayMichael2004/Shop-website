@@ -20,13 +20,13 @@ export default function ThankYouModal({ quoteResponse, onClose, onReset, onTrack
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in font-sans">
       <div 
-        className="relative w-full max-w-lg bg-[#f9f9f8] rounded-3xl shadow-2xl p-6 sm:p-10 text-center border border-neutral-300 my-auto overflow-hidden"
+        className="relative w-full max-w-lg bg-[#f9f9f8] rounded-3xl shadow-2xl p-5 sm:p-10 text-center border border-neutral-300 my-auto overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Giant Editorial Typography matching thank you inspo.jpg */}
         <div className="mb-6 select-none text-left pl-2">
-          <div className="font-sans text-5xl sm:text-6xl md:text-7xl font-black text-[#111111] tracking-tight leading-[0.9]">
+          <div className="font-sans text-4xl sm:text-6xl md:text-7xl font-black text-[#111111] tracking-tight leading-[0.9]">
             <div>Thank</div>
             <div className="flex items-center gap-4 pl-8 mt-1">
               <span className="w-10 sm:w-14 h-[2px] bg-[#111111] inline-block -translate-y-1"></span>
@@ -56,7 +56,7 @@ export default function ThankYouModal({ quoteResponse, onClose, onReset, onTrack
             </button>
           </div>
           
-          <div className="text-2xl font-mono font-black text-neutral-900 tracking-wide">
+          <div className="text-xl sm:text-2xl font-mono font-black text-neutral-900 tracking-wide break-all">
             {quoteNumber}
           </div>
 

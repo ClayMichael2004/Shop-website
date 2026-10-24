@@ -1077,7 +1077,7 @@ export default function AdminPortal({
       
       {/* Top Navigation Header matching customer dashboard style */}
       <header className="sticky top-0 z-40 w-full bg-white border-b border-neutral-200/80 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-2">
           
           {/* Logo & Portal Identity */}
           <div className="flex items-center gap-3">
@@ -1089,7 +1089,7 @@ export default function AdminPortal({
                 <span className="font-serif tracking-wider text-xl font-bold text-[#18181b]">
                   KADIANGA
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-800 bg-neutral-200/80 px-2 py-0.5 rounded border border-neutral-300">
+                <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider text-neutral-800 bg-neutral-200/80 px-2 py-0.5 rounded border border-neutral-300">
                   Admin Operations
                 </span>
               </div>
@@ -1192,7 +1192,7 @@ export default function AdminPortal({
       </header>
 
       {/* Main Admin Portal Container */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 py-8 sm:py-10">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-10">
         
         {/* Flash Success Notification */}
         {actionSuccessMsg && (
@@ -1461,7 +1461,7 @@ export default function AdminPortal({
               ) : (
                 <div className="divide-y divide-neutral-100 text-xs">
                   {quotes.slice(0, 5).map((q) => (
-                    <div key={q.id} className="p-4 sm:px-6 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                    <div key={q.id} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-neutral-50 transition-colors">
                       <div className="flex items-center gap-4">
                         <div className="w-9 h-9 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center font-mono font-bold text-neutral-700 text-xs">
                           #
@@ -1594,7 +1594,7 @@ export default function AdminPortal({
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full min-w-[580px] text-left text-xs">
                     <thead className="bg-[#faf9f6] border-b border-neutral-200 text-neutral-800 uppercase font-mono tracking-wider font-bold">
                       <tr>
                         <th className="py-3.5 px-6 font-bold">Quote #</th>

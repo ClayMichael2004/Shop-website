@@ -106,7 +106,7 @@ export default function ProductCatalog({
 
   return (
     <section id="shop-section" className="w-full bg-[#fcfbf9] py-16 sm:py-20 border-b border-neutral-200/60 font-sans">
-      <div id="catalog-view-anchor" className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div id="catalog-view-anchor" className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Header matching items section layout.jpg with industry standard typography */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -180,7 +180,7 @@ export default function ProductCatalog({
               </button>
 
               {activeDropdown === 'cat' && (
-                <div className="absolute top-full left-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
+                <div className="absolute top-full left-0 mt-2 w-60 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
                   {categories.map((c) => (
                     <button
                       key={c}
@@ -212,7 +212,7 @@ export default function ProductCatalog({
               </button>
 
               {activeDropdown === 'color' && (
-                <div className="absolute top-full left-0 mt-2 w-44 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
+                <div className="absolute top-full left-0 mt-2 w-44 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
                   <span className="block px-4 py-1 text-[11px] font-bold uppercase text-neutral-800">Finishes / Color</span>
                   {productColors.map((col) => (
                     <button
@@ -243,7 +243,7 @@ export default function ProductCatalog({
               </button>
 
               {activeDropdown === 'size' && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
+                <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
                   <span className="block px-4 py-1 text-[11px] font-bold uppercase text-neutral-800">Available Sizes</span>
                   {['1.5mm² (Lighting)', '2.5mm² (Ring Mains)', '4.0mm² (Heavier Load)', '16mm² - 95mm² (Armoured)', '5 Drop Cluster'].map((sz) => (
                     <button
@@ -387,7 +387,7 @@ export default function ProductCatalog({
 
                 <div>
                   {/* Price & Action Button Row */}
-                  <div className="flex items-center justify-between pt-3 border-t border-neutral-200">
+                  <div className="flex items-center justify-between pt-3 border-t border-neutral-200 gap-2 flex-wrap sm:flex-nowrap">
                     <div>
                       <span className="text-base sm:text-lg font-bold text-neutral-900 block leading-tight">
                         KSh {Number(prod.base_estimate_price || 0).toLocaleString()}

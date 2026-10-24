@@ -93,7 +93,7 @@ export default function TrackQuoteModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md overflow-y-auto animate-fade-in font-sans">
       <div 
-        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-6 sm:p-8 my-auto border border-neutral-200 text-neutral-900"
+        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-4 sm:p-8 my-auto border border-neutral-200 text-neutral-900"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -125,7 +125,7 @@ export default function TrackQuoteModal({
           <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-2">
             Quote Reference Number
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -193,7 +193,7 @@ export default function TrackQuoteModal({
                 <p className="text-xs font-bold text-neutral-800 uppercase tracking-wider mb-2">Item Breakdown</p>
                 <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden divide-y divide-neutral-200 text-xs">
                   {quoteData.items.map((item, idx) => (
-                    <div key={idx} className="p-3 sm:p-4 flex items-center justify-between gap-3">
+                    <div key={idx} className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex-1">
                         <p className="font-bold text-neutral-900 text-sm">{item.product_name}</p>
                         <p className="text-neutral-600 font-medium">Qty: {item.quantity} {item.specs_notes ? `• ${item.specs_notes}` : ''}</p>
