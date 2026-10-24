@@ -1073,7 +1073,7 @@ export default function AdminPortal({
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f6] text-[#121212] font-sans selection:bg-[#e67e22] selection:text-white flex flex-col justify-between">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#faf9f6] text-[#121212] font-sans selection:bg-[#e67e22] selection:text-white flex flex-col justify-between">
       
       {/* Top Navigation Header matching customer dashboard style */}
       <header className="sticky top-0 z-40 w-full bg-white border-b border-neutral-200/80 shadow-sm">
@@ -1192,7 +1192,7 @@ export default function AdminPortal({
       </header>
 
       {/* Main Admin Portal Container */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-10">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-10 overflow-x-hidden">
         
         {/* Flash Success Notification */}
         {actionSuccessMsg && (

@@ -150,22 +150,22 @@ export default function Footer({ onNavigate, onOpenTrackQuote }) {
 
       {/* Center Giant Geometric Brand Typography */}
       <div className="w-full py-6 sm:py-8 text-center overflow-hidden">
-        <span className="font-sans font-black text-5xl sm:text-8xl md:text-[130px] lg:text-[180px] xl:text-[220px] tracking-tighter text-[#18181b] leading-none inline-block select-none opacity-90">
+        <span className="font-sans font-black text-4xl sm:text-7xl md:text-[110px] lg:text-[160px] xl:text-[200px] tracking-tighter text-[#18181b] leading-none inline-block select-none opacity-90 max-w-full truncate">
           kadianga
         </span>
       </div>
 
       {/* Bottom Row */}
-      <div className="w-full flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-neutral-300 text-xs sm:text-sm text-neutral-700 font-medium gap-3 text-center sm:text-left">
-        <div className="flex items-center gap-3">
+      <div className="w-full flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-neutral-300 text-xs text-neutral-700 font-medium gap-3 text-center sm:text-left">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-3">
           <span>Kadianga Electricals ©2026</span>
-          <span>·</span>
+          <span className="hidden sm:inline">·</span>
           <span>Quality Certified Supplies</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span>Old Fire Station (Beside Kakwacha/Hangover), Ang'awa St, Kisumu</span>
-          <span>·</span>
+        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 sm:gap-3 text-center sm:text-right">
+          <span className="break-words max-w-xs sm:max-w-none">Old Fire Station (Beside Kakwacha/Hangover), Ang'awa St, Kisumu</span>
+          <span className="hidden sm:inline">·</span>
           <span>{timeStr}</span>
         </div>
       </div>

@@ -18,7 +18,7 @@ export default function HeroCables() {
       </div>
 
       {/* Main Hero Content: Exactly and exclusively the three requested elements, balanced on the space */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center py-20 sm:py-28 flex flex-col items-center justify-center">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-8 lg:px-12 text-center py-16 sm:py-28 flex flex-col items-center justify-center">
         
         {/* Eyebrow */}
         <span className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-[#e67e22] font-semibold mb-4 block">
@@ -26,7 +26,7 @@ export default function HeroCables() {
         </span>
 
         {/* Title */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-sans font-bold tracking-tight text-white mb-6 drop-shadow-md leading-[1.08]">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-bold tracking-tight text-white mb-6 drop-shadow-md leading-[1.08]">
           Power Cables &amp; Hardware
         </h1>
 

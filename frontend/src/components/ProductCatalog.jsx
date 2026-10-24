@@ -270,7 +270,7 @@ export default function ProductCatalog({
               </button>
 
               {activeDropdown === 'brand' && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
+                <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-30">
                   <span className="block px-4 py-1 text-[11px] font-bold uppercase text-neutral-800">Manufacturers</span>
                   {['Kadianga Certified', 'East African Cables', 'Schneider Electric', 'ABB Industrial'].map((b) => (
                     <button

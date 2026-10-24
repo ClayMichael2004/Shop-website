@@ -45,15 +45,15 @@ export default function Navbar({
           onClick={() => handleNavClick('home')} 
           className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none shrink-0"
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#18181b] group-hover:bg-[#e67e22] flex items-center justify-center text-white font-bold text-xs sm:text-sm tracking-wider transition-colors shadow-sm">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#18181b] group-hover:bg-[#e67e22] flex items-center justify-center text-white font-bold text-xs sm:text-sm tracking-wider transition-colors shadow-sm shrink-0">
             KE
           </div>
-          <div>
-            <span className="font-serif tracking-wider text-lg sm:text-xl font-bold text-[#18181b] flex items-center gap-1 sm:gap-1.5">
+          <div className="flex flex-col justify-center leading-none">
+            <span className="font-serif tracking-wider text-base sm:text-xl font-bold text-[#18181b]">
               KADIANGA
-              <span className="text-[10px] sm:text-xs uppercase font-sans font-bold tracking-widest text-[#e67e22]">
-                Electricals
-              </span>
+            </span>
+            <span className="text-[9px] sm:text-xs uppercase font-sans font-bold tracking-widest text-[#e67e22]">
+              Electricals
             </span>
           </div>
         </div>

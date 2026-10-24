@@ -103,7 +103,7 @@ export default function HeroChandelier({ onExplore }) {
           </button>
           <button
             onClick={handleNext}
-            className="w-16 h-16 bg-[#dfd6c8] hover:bg-[#d4c9b9] text-xs font-light text-neutral-800 flex items-center justify-center tracking-wider transition-colors"
+            className="w-12 h-12 sm:w-16 sm:h-16 bg-[#dfd6c8] hover:bg-[#d4c9b9] text-xs font-light text-neutral-800 flex items-center justify-center tracking-wider transition-colors"
             aria-label="Next slide"
           >
             next

@@ -21,7 +21,7 @@ export default function HomePage({
 
       {/* 2. Flagship Category Gateway Cards matching industry standards */}
       <section className="w-full bg-[#fcfbf9] py-20 border-b border-neutral-200/60">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
           
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs uppercase font-mono tracking-widest text-neutral-700 block mb-2 font-bold">
@@ -56,7 +56,7 @@ export default function HomePage({
                 </div>
               </div>
 
-              <div className="p-8 flex flex-col justify-between flex-1">
+              <div className="p-5 sm:p-8 flex flex-col justify-between flex-1">
                 <div>
                   <h3 className="text-2xl font-bold text-neutral-900 mb-2 group-hover:text-[#e67e22] transition-colors">
                     Architectural Lighting &amp; Chandeliers
@@ -92,7 +92,7 @@ export default function HomePage({
                 </div>
               </div>
 
-              <div className="p-8 flex flex-col justify-between flex-1">
+              <div className="p-5 sm:p-8 flex flex-col justify-between flex-1">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-[#e67e22] transition-colors">
                     Power Cables &amp; Industrial Hardware
@@ -117,7 +117,7 @@ export default function HomePage({
       {/* 3. Featured Contractor Best Sellers */}
       {featuredProducts.length > 0 && (
         <section className="w-full bg-white py-20 border-b border-neutral-200/60">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
             
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
               <div>
@@ -197,7 +197,7 @@ export default function HomePage({
 
       {/* 4. Why Electrical Contractors Trust Kadianga */}
       <section className="w-full bg-[#faf9f6] py-20 border-b border-neutral-200/60">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
           
           <div className="text-center max-w-xl mx-auto mb-16">
             <span className="text-xs uppercase font-mono tracking-widest text-neutral-700 block mb-2 font-bold">

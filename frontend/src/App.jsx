@@ -532,7 +532,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f6] text-[#121212] flex flex-col justify-between selection:bg-[#e67e22] selection:text-white font-sans">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#faf9f6] text-[#121212] flex flex-col justify-between selection:bg-[#e67e22] selection:text-white font-sans">
       
       {/* Offline Sync Banner if active */}
       {syncAlert && (
@@ -556,7 +556,7 @@ export default function App() {
         onSearchSubmit={() => handleNavigate('products')}
       />
 
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         
         {/* Page 1: Home Page */}
         {activeSection === 'home' && (

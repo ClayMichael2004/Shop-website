@@ -200,7 +200,7 @@ export default function CartQuotation({
               </div>
 
               {/* Scrollable Items Container (Displays ~3-4 items, scroll up/down to view the rest) */}
-              <div className="max-h-[380px] sm:max-h-[440px] overflow-y-auto divide-y divide-neutral-200 text-xs sm:text-sm pr-2 -mr-2">
+              <div className="max-h-[380px] sm:max-h-[440px] overflow-y-auto divide-y divide-neutral-200 text-xs sm:text-sm pr-1">
                 {cart.map((item) => (
                   <div key={item.id} className="grid grid-cols-12 items-center py-4 gap-2 hover:bg-neutral-50/60 transition-colors rounded-xl px-1">
                     
