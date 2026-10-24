@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-sand: #f8f6f0;
+  --bg-card: #ffffff;
+  --accent-gold: #c59b27;
+  --text-dark: #121212;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  background-color: #faf9f6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* 3D Hexagonal background pattern matching background ui design pattern.jpg */
+.hex-pattern-bg {
+  background-color: #ffffff;
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(250, 249, 246, 0.85)),
+    url('/images/background ui design pattern.jpg');
+  background-size: 24px 24px, 100% 100%, cover;
+  background-position: 0 0, 0 0, center bottom;
+  background-repeat: repeat, no-repeat, no-repeat;
+}
+
+.frosted-glass {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.frosted-dark {
+  background: rgba(20, 20, 22, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1efe9;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1ccbe;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b5ae9d;
+}
+
+/* Duo Phone and Foldable Devices responsive styling */
+@media (screen-spanning: single-fold-vertical) {
+  .duo-fold-split {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    column-gap: env(fold-width, 24px) !important;
+  }
+}
+
+@media (min-width: 540px) and (max-width: 720px) {
+  .duo-friendly-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
