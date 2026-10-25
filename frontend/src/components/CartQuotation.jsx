@@ -21,6 +21,7 @@ export default function CartQuotation({
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Subtotal calculation
   const subtotal = cart.reduce((acc, item) => {
@@ -295,7 +296,7 @@ export default function CartQuotation({
                 {onClearCart && (
                   <button
                     type="button"
-                    onClick={onClearCart}
+                    onClick={() => setShowClearConfirm(true)}
                     className="text-xs font-semibold text-neutral-500 hover:text-red-600 transition-colors"
                   >
                     Clear All
@@ -449,6 +450,40 @@ export default function CartQuotation({
             Lets Talk!
           </button>
         </div>
+
+        {/* Danger Confirmation Modal for Clearing Quotation Cart */}
+        {showClearConfirm && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-neutral-200" onClick={(e) => e.stopPropagation()}>
+              <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-900 mb-1.5">Clear Quotation Cart?</h3>
+              <p className="text-xs text-neutral-600 mb-6 leading-relaxed">
+                Are you sure you want to remove all {cart.length} item{cart.length > 1 ? 's' : ''} from your quotation cart? You will need to re-add them if you change your mind.
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowClearConfirm(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors border border-neutral-200"
+                >
+                  Keep Items
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowClearConfirm(false);
+                    onClearCart && onClearCart();
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition-colors shadow-sm"
+                >
+                  Yes, Clear Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bottom Footer inside card matching inspo */}
         <div className="mt-10 pt-6 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-700 font-medium">

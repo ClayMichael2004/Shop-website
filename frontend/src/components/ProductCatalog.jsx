@@ -312,7 +312,7 @@ export default function ProductCatalog({
 
         {/* Polished Product Cards Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl border border-neutral-200 p-5 animate-pulse">
                 <div className="w-full aspect-[4/3] bg-neutral-100 rounded-xl mb-4"></div>
@@ -339,16 +339,16 @@ export default function ProductCatalog({
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
             {paginatedProducts.map((prod) => (
               <div
                 key={prod.id}
                 onClick={() => onSelectProduct && onSelectProduct(prod)}
-                className="group relative bg-white border border-neutral-300 hover:border-neutral-500 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl flex flex-col justify-between cursor-pointer select-none"
+                className="group relative bg-white border border-neutral-300 hover:border-neutral-500 rounded-xl sm:rounded-2xl p-2.5 sm:p-5 transition-all duration-300 hover:shadow-xl flex flex-col justify-between cursor-pointer select-none"
               >
                 <div>
                   {/* Product Image Frame */}
-                  <div className="relative w-full aspect-[4/3] bg-gradient-to-b from-[#f9f9f9] to-[#f2f0eb] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-3 border border-neutral-100">
+                  <div className="relative w-full aspect-[4/3] bg-gradient-to-b from-[#f9f9f9] to-[#f2f0eb] rounded-lg sm:rounded-xl overflow-hidden mb-2 sm:mb-4 flex items-center justify-center p-1.5 sm:p-3 border border-neutral-100">
                     <img
                       src={prod.image_url}
                       alt={prod.name}
@@ -356,13 +356,13 @@ export default function ProductCatalog({
                     />
                     
                     {/* Stock Status Badge */}
-                    <div className="absolute top-2.5 left-2.5">
+                    <div className="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5">
                       {prod.in_stock === false ? (
-                        <span className="bg-neutral-900 text-white text-[11px] font-bold px-2.5 py-0.5 rounded shadow-sm">
+                        <span className="bg-neutral-900 text-white text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded shadow-sm">
                           Sold Out
                         </span>
                       ) : (
-                        <span className="bg-white/95 backdrop-blur-sm text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-200 shadow-sm">
+                        <span className="bg-white/95 backdrop-blur-sm text-emerald-800 text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded border border-emerald-200 shadow-sm">
                           In Stock
                         </span>
                       )}
@@ -370,29 +370,29 @@ export default function ProductCatalog({
                   </div>
 
                   {/* Subcategory Label */}
-                  <span className="text-xs font-mono font-bold text-neutral-700 uppercase tracking-wider block mb-1 truncate">
+                  <span className="text-[9px] sm:text-xs font-mono font-bold text-neutral-700 uppercase tracking-wider block mb-0.5 sm:mb-1 truncate">
                     {prod.subcategory || prod.category}
                   </span>
 
                   {/* Product Title */}
-                  <h3 className="text-sm sm:text-base font-bold text-neutral-900 line-clamp-2 leading-snug group-hover:text-[#e67e22] transition-colors mb-1.5">
+                  <h3 className="text-xs sm:text-base font-bold text-neutral-900 line-clamp-2 leading-tight sm:leading-snug group-hover:text-[#e67e22] transition-colors mb-1 sm:mb-1.5">
                     {prod.name}
                   </h3>
 
                   {/* Short Description */}
-                  <p className="text-xs text-neutral-700 line-clamp-2 mb-4 leading-relaxed font-normal">
+                  <p className="text-[10px] sm:text-xs text-neutral-700 line-clamp-1 sm:line-clamp-2 mb-2 sm:mb-4 leading-normal sm:leading-relaxed font-normal">
                     {prod.short_description}
                   </p>
                 </div>
 
                 <div>
                   {/* Price & Action Button Row */}
-                  <div className="flex items-center justify-between pt-3 border-t border-neutral-200 gap-2 flex-wrap sm:flex-nowrap">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 sm:pt-3 border-t border-neutral-200 gap-1.5 sm:gap-2">
                     <div>
-                      <span className="text-base sm:text-lg font-bold text-neutral-900 block leading-tight">
+                      <span className="text-xs sm:text-lg font-bold text-neutral-900 block leading-tight">
                         KSh {Number(prod.base_estimate_price || 0).toLocaleString()}
                       </span>
-                      <span className="text-[11px] text-neutral-600 font-semibold block">
+                      <span className="text-[9px] sm:text-[11px] text-neutral-600 font-semibold block">
                         Wholesale Guide
                       </span>
                     </div>
@@ -404,26 +404,26 @@ export default function ProductCatalog({
                         onAddToCart && onAddToCart(prod);
                       }}
                       disabled={prod.in_stock === false}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                      className={`w-full sm:w-auto px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm active:scale-95 ${
                         prod.in_stock === false
                           ? 'bg-neutral-200 text-neutral-600 cursor-not-allowed border border-neutral-300'
                           : 'bg-[#18181b] hover:bg-[#e67e22] text-white'
                       }`}
                       title={prod.in_stock === false ? 'Item sold out' : 'Add to quotation cart'}
                     >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>{prod.in_stock === false ? 'Sold Out' : 'Add to Quote'}</span>
+                      <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                      <span>{prod.in_stock === false ? 'Sold Out' : 'Quote'}</span>
                     </button>
                   </div>
 
                   {/* Color Swatch Dots matching items section layout.jpg */}
-                  <div className="flex items-center gap-1.5 pt-3 mt-2 border-t border-neutral-200">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#1e3a8a] border border-black/10"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#854d0e] border border-black/10"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#64748b] border border-black/10"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#c2410c] border border-black/10"></span>
-                    <span className="text-[11px] text-neutral-700 ml-auto font-medium">
-                      SKU: {prod.sku}
+                  <div className="flex items-center gap-1 sm:gap-1.5 pt-2 sm:pt-3 mt-1.5 sm:mt-2 border-t border-neutral-200">
+                    <span className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full bg-[#1e3a8a] border border-black/10"></span>
+                    <span className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full bg-[#854d0e] border border-black/10"></span>
+                    <span className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full bg-[#64748b] border border-black/10"></span>
+                    <span className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full bg-[#c2410c] border border-black/10"></span>
+                    <span className="text-[9px] sm:text-[11px] text-neutral-700 ml-auto font-mono truncate">
+                      {prod.sku}
                     </span>
                   </div>
 

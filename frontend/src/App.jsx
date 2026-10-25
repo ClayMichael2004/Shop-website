@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Check, ShoppingBag, X } from 'lucide-react';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
 import LightingPage from './components/LightingPage';
@@ -71,6 +72,7 @@ export default function App() {
   const [isTrackQuoteOpen, setIsTrackQuoteOpen] = useState(false);
   const [trackQuotePrefill, setTrackQuotePrefill] = useState('');
   const [syncAlert, setSyncAlert] = useState('');
+  const [cartToast, setCartToast] = useState(null);
   const [errorState, setErrorState] = useState(null);
 
   // Fallback comprehensive seed products in case server is starting or offline
@@ -417,7 +419,14 @@ export default function App() {
       }
       return [...prev, { ...product, quantity: product.quantity || 1 }];
     });
-    setIsCartOpen(true);
+    // Add product quickly without redirecting to cart modal
+    setCartToast({
+      name: product.name,
+      quantity: product.quantity || 1
+    });
+    setTimeout(() => {
+      setCartToast(null);
+    }, 3500);
   };
 
   const handleUpdateQuantity = (productId, newQuantity) => {
@@ -674,6 +683,46 @@ export default function App() {
         companyPhone="+254712880970"
         companyWhatsApp="254712880970"
       />
+
+      {/* Floating Instant Toast Notification when Quick-Adding to Cart */}
+      {cartToast && (
+        <div 
+          className="fixed bottom-5 right-4 sm:right-6 z-[80] max-w-sm w-[calc(100%-2rem)] sm:w-auto bg-[#18181b]/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10 flex items-center justify-between gap-3 animate-fade-in"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <Check className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white truncate">Added to Quotation Cart</p>
+              <p className="text-[11px] text-neutral-400 truncate max-w-[180px] sm:max-w-[220px]">{cartToast.name}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setCartToast(null);
+                setIsCartOpen(true);
+              }}
+              className="px-3 py-1.5 bg-[#e67e22] hover:bg-[#d35400] text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 active:scale-95"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCartToast(null)}
+              className="p-1 text-neutral-400 hover:text-white transition-colors"
+              aria-label="Dismiss toast"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

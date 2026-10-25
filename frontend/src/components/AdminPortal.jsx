@@ -5,7 +5,7 @@ import {
   TrendingUp, BarChart3, Coins, CheckCircle2, Clock, 
   Store, LogOut, X, AlertCircle, ToggleLeft, ToggleRight,
   Lock, KeyRound, Shield, Upload, Image as ImageIcon, Mail, ExternalLink, Check,
-  FolderPlus, Tag
+  FolderPlus, Tag, AlertTriangle, Info
 } from 'lucide-react';
 import { cacheProductsOffline } from '../offline/db';
 
@@ -66,6 +66,37 @@ export default function AdminPortal({
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Active Dialog/Confirmation Modal state (replaces native alert and confirm)
+  const [portalModal, setPortalModal] = useState(null);
+
+  const showPortalAlert = (title, message, type = 'info') => {
+    setPortalModal({
+      isOpen: true,
+      type,
+      title,
+      message,
+      confirmText: 'Understood',
+      onConfirm: () => setPortalModal(null)
+    });
+  };
+
+  const showPortalConfirm = ({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', isDanger = false, onConfirm }) => {
+    setPortalModal({
+      isOpen: true,
+      type: isDanger ? 'danger' : 'confirm',
+      title,
+      message,
+      confirmText,
+      cancelText,
+      isDanger,
+      onConfirm: () => {
+        setPortalModal(null);
+        if (onConfirm) onConfirm();
+      },
+      onCancel: () => setPortalModal(null)
+    });
+  };
   const [customCategories, setCustomCategories] = useState(() => {
     try {
       const stored = localStorage.getItem('kadianga_custom_categories');
@@ -346,7 +377,7 @@ export default function AdminPortal({
       } else {
         // Revert on error
         setProducts(prev => prev.map(p => p.id === product.id ? product : p));
-        alert('Server failed to update product stock status.');
+        showPortalAlert('Stock Update Failed', 'Server failed to update product stock status. Please check your connection.', 'warning');
       }
     } catch (err) {
       console.error('Network error updating stock:', err);
@@ -475,11 +506,9 @@ export default function AdminPortal({
   };
 
   // Product CRUD
-  const handleSaveProduct = async (e) => {
+  const handleSaveProduct = (e) => {
     e.preventDefault();
     const isEdit = Boolean(editingProduct?.id);
-    const url = isEdit ? `${apiBase}/admin/products/${editingProduct.id}` : `${apiBase}/admin/products`;
-    const method = isEdit ? 'PUT' : 'POST';
 
     const payload = {
       ...editingProduct,
@@ -488,6 +517,24 @@ export default function AdminPortal({
       slug: editingProduct.slug || editingProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     };
 
+    if (isEdit) {
+      showPortalConfirm({
+        title: 'Confirm Catalog Update',
+        message: `Are you sure you want to save updates to "${payload.name}"? The updated guide price (KSh ${Number(payload.base_estimate_price || 0).toLocaleString()}) and catalog details will immediately take effect across the store.`,
+        confirmText: 'Confirm & Update',
+        cancelText: 'Keep Editing',
+        isDanger: false,
+        onConfirm: () => executeSaveProduct(payload, true)
+      });
+      return;
+    }
+
+    executeSaveProduct(payload, false);
+  };
+
+  const executeSaveProduct = async (payload, isEdit) => {
+    const url = isEdit ? `${apiBase}/admin/products/${payload.id}` : `${apiBase}/admin/products`;
+    const method = isEdit ? 'PUT' : 'POST';
     const activeToken = token || sessionStorage.getItem('voltcraft_admin_token') || 'kadianga-admin-2026';
 
     try {
@@ -518,22 +565,33 @@ export default function AdminPortal({
     }
   };
 
-  const handleDeleteProduct = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}"?`)) return;
-    try {
-      const res = await fetch(`${apiBase}/admin/products/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        triggerSuccess('Product deleted successfully.');
-        fetchProducts();
-        fetchStats();
+  const handleDeleteProduct = (id, name) => {
+    showPortalConfirm({
+      title: 'Delete Product',
+      message: `Are you sure you want to permanently delete "${name}" from the catalog? This action cannot be undone.`,
+      confirmText: 'Delete Product',
+      cancelText: 'Cancel',
+      isDanger: true,
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/admin/products/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            triggerSuccess('Product deleted successfully.');
+            fetchProducts();
+            fetchStats();
+          } else {
+            setProducts(prev => prev.filter(p => p.id !== id));
+            triggerSuccess('Product removed from catalog.');
+          }
+        } catch (e) {
+          setProducts(prev => prev.filter(p => p.id !== id));
+          triggerSuccess('Product removed from catalog.');
+        }
       }
-    } catch (e) {
-      setProducts(prev => prev.filter(p => p.id !== id));
-      triggerSuccess('Product removed from catalog.');
-    }
+    });
   };
 
   // -------------------------------------------------------------
@@ -671,7 +729,7 @@ export default function AdminPortal({
         type: 'error',
         text: 'Customer did not provide a phone number for WhatsApp dispatch.'
       });
-      alert('Customer did not provide a phone number for WhatsApp.');
+      showPortalAlert('WhatsApp Phone Missing', 'This customer did not provide a phone number for WhatsApp dispatch.', 'warning');
       return;
     }
 
@@ -733,7 +791,7 @@ export default function AdminPortal({
         type: 'error',
         text: 'This customer did not provide an email address.'
       });
-      alert('This customer did not provide an email address.');
+      showPortalAlert('Email Address Missing', 'This customer did not provide an email address for quote delivery.', 'warning');
       return;
     }
 
@@ -837,7 +895,7 @@ export default function AdminPortal({
 
   const handleOpenInGmail = () => {
     if (!selectedQuote || !selectedQuote.customer_email) {
-      alert('This quote request does not include a customer email address.');
+      showPortalAlert('Email Address Missing', 'This quote request does not include a customer email address.', 'warning');
       return;
     }
     const { subject, body } = getEmailContent(
@@ -882,11 +940,11 @@ export default function AdminPortal({
   // -------------------------------------------------------------
   const handleExportCSV = () => {
     if (!quotes || quotes.length === 0) {
-      alert('No quotation records available to export.');
+      showPortalAlert('Export Notice', 'No quotation records available to export.', 'info');
       return;
     }
 
-    const headers = ['Quote Number', 'Customer Name', 'Email', 'Phone', 'Location', 'Status', 'Grand Total ($)', 'Date'];
+    const headers = ['Quote Number', 'Customer Name', 'Email', 'Phone', 'Location', 'Status', 'Grand Total (KSh)', 'Date'];
     const rows = quotes.map(q => [
       `"${q.quote_number || ''}"`,
       `"${(q.customer_name || '').replace(/"/g, '""')}"`,
@@ -2733,6 +2791,94 @@ export default function AdminPortal({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Universal Action / Danger Confirmation & Notice Modal */}
+      {portalModal && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fade-in"
+          onClick={() => {
+            if (portalModal.type !== 'danger' && !portalModal.onCancel) {
+              setPortalModal(null);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-neutral-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-4 mb-4">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                portalModal.type === 'danger' 
+                  ? 'bg-red-100 text-red-600' 
+                  : portalModal.type === 'warning' 
+                    ? 'bg-amber-100 text-amber-700' 
+                    : portalModal.type === 'confirm'
+                      ? 'bg-orange-100 text-[#e67e22]'
+                      : 'bg-blue-100 text-blue-700'
+              }`}>
+                {portalModal.type === 'danger' ? (
+                  <Trash2 className="w-5 h-5 stroke-[2]" />
+                ) : portalModal.type === 'warning' ? (
+                  <AlertTriangle className="w-5 h-5 stroke-[2]" />
+                ) : portalModal.type === 'confirm' ? (
+                  <AlertCircle className="w-5 h-5 stroke-[2]" />
+                ) : (
+                  <Info className="w-5 h-5 stroke-[2]" />
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-neutral-900 leading-snug">
+                  {portalModal.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-600 mt-1.5 leading-relaxed font-normal">
+                  {portalModal.message}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-neutral-100">
+              {portalModal.onCancel ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      portalModal.onCancel();
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors border border-neutral-200"
+                  >
+                    {portalModal.cancelText || 'Cancel'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      portalModal.onConfirm();
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-sm active:scale-95 ${
+                      portalModal.isDanger
+                        ? 'bg-red-600 hover:bg-red-700'
+                        : 'bg-[#18181b] hover:bg-[#e67e22]'
+                    }`}
+                  >
+                    {portalModal.confirmText || 'Confirm'}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (portalModal.onConfirm) portalModal.onConfirm();
+                    setPortalModal(null);
+                  }}
+                  className="px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#18181b] hover:bg-[#27272a] transition-all shadow-sm active:scale-95"
+                >
+                  {portalModal.confirmText || 'Understood'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
