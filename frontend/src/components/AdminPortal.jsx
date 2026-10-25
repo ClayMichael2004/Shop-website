@@ -5,7 +5,7 @@ import {
   TrendingUp, BarChart3, Coins, CheckCircle2, Clock, 
   Store, LogOut, X, AlertCircle, ToggleLeft, ToggleRight,
   Lock, KeyRound, Shield, Upload, Image as ImageIcon, Mail, ExternalLink, Check,
-  FolderPlus, Tag, AlertTriangle, Info, MessageSquare
+  FolderPlus, Tag, AlertTriangle, Info, MessageSquare, Menu
 } from 'lucide-react';
 import { cacheProductsOffline } from '../offline/db';
 
@@ -24,6 +24,7 @@ export default function AdminPortal({
   const [loginError, setLoginError] = useState('');
 
   const [activeTab, setActiveTab] = useState('reports'); // 'reports', 'quotes', 'inventory'
+  const [adminMobileMenuOpen, setAdminMobileMenuOpen] = useState(false);
   
   // Dashboard & Reports state
   const [stats, setStats] = useState({ 
@@ -1267,137 +1268,238 @@ export default function AdminPortal({
       </div>
     );
   }
+  const currentHeaderSearch = activeTab === 'inventory' 
+    ? inventorySearch 
+    : activeTab === 'inquiries' 
+    ? inquiriesSearch 
+    : quotesSearch;
+
+  const handleHeaderSearch = (val) => {
+    if (activeTab === 'inventory') {
+      setInventorySearch(val);
+    } else if (activeTab === 'inquiries') {
+      setInquiriesSearch(val);
+    } else {
+      setQuotesSearch(val);
+    }
+  };
+
+  const adminNavLinks = [
+    { id: 'reports', label: 'Reports' },
+    { 
+      id: 'quotes', 
+      label: 'Quotations',
+      badge: stats.pending_quotes > 0 ? `${stats.pending_quotes} new` : (productQuotes.length > 0 ? productQuotes.length : null),
+      badgeClass: stats.pending_quotes > 0 
+        ? "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-orange-100 text-[#e67e22] font-black border border-orange-200" 
+        : "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-neutral-100 text-neutral-800 font-bold border border-neutral-300"
+    },
+    { 
+      id: 'inquiries', 
+      label: 'Inquiries',
+      badge: pendingInquiriesCount > 0 ? `${pendingInquiriesCount} new` : (inquiries.length > 0 ? inquiries.length : null),
+      badgeClass: pendingInquiriesCount > 0 
+        ? "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-700 font-black border border-purple-200" 
+        : "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-neutral-100 text-neutral-800 font-bold border border-neutral-300"
+    },
+    { 
+      id: 'inventory', 
+      label: 'Inventory',
+      badge: soldOutCount > 0 ? `${soldOutCount} out` : (products.length > 0 ? products.length : null),
+      badgeClass: soldOutCount > 0 
+        ? "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-red-100 text-red-700 font-bold border border-red-200" 
+        : "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-neutral-100 text-neutral-800 font-bold border border-neutral-300"
+    },
+  ];
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#faf9f6] text-[#121212] font-sans selection:bg-[#e67e22] selection:text-white flex flex-col justify-between">
       
-      {/* Top Navigation Header matching customer dashboard style */}
-      <header className="sticky top-0 z-40 w-full bg-white border-b border-neutral-200/80 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-2">
+            {/* Top Navigation Header matching customer storefront navbar exactly */}
+      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-neutral-300 text-neutral-900 shadow-sm transition-all">
+        <div className="max-w-7xl mx-auto px-3 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-2 sm:gap-6">
           
-          {/* Logo & Portal Identity */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#18181b] flex items-center justify-center text-white font-bold text-xs tracking-wider shadow-sm">
+          {/* Left: Brand Logo & Admin Badge */}
+          <div 
+            onClick={() => {
+              setActiveTab('reports');
+              setAdminMobileMenuOpen(false);
+            }} 
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none shrink-0"
+          >
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#18181b] group-hover:bg-[#e67e22] flex items-center justify-center text-white font-bold text-xs sm:text-sm tracking-wider transition-colors shadow-sm shrink-0">
               KE
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-serif tracking-wider text-xl font-bold text-[#18181b]">
+            <div className="flex flex-col justify-center leading-none">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-serif tracking-wider text-base sm:text-xl font-bold text-[#18181b]">
                   KADIANGA
                 </span>
-                <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider text-neutral-800 bg-neutral-200/80 px-2 py-0.5 rounded border border-neutral-300">
-                  Admin Operations
+                <span className="text-[9px] uppercase font-bold tracking-wider text-neutral-800 bg-neutral-100 px-1.5 py-0.5 rounded border border-neutral-300">
+                  Admin
                 </span>
               </div>
+              <span className="text-[9px] sm:text-xs uppercase font-sans font-bold tracking-widest text-[#e67e22]">
+                Electricals
+              </span>
             </div>
           </div>
 
-          {/* Navigation Tabs (Reports, Quotes, Inventory) */}
-          <nav className="hidden md:flex items-center gap-2 bg-[#f4f2ee] p-1.5 rounded-2xl border border-neutral-200">
-            <button
-              onClick={() => setActiveTab('reports')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === 'reports'
-                  ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/80'
-                  : 'text-neutral-600 hover:text-neutral-900'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Reports &amp; Analytics</span>
-            </button>
-
-            <button
-            onClick={() => setActiveTab('quotes')}
-            className={`pb-1 border-b-2 ${activeTab === 'quotes' ? 'border-[#18181b] text-[#18181b]' : 'border-transparent text-neutral-700 font-semibold'}`}
-          >
-            Quotes ({productQuotes.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('inquiries')}
-            className={`pb-1 border-b-2 ${activeTab === 'inquiries' ? 'border-purple-600 text-purple-700 font-bold' : 'border-transparent text-neutral-700 font-semibold'}`}
-          >
-            Inquiries ({inquiries.length})
-          </button>
-
-            <button
-              onClick={() => setActiveTab('inquiries')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === 'inquiries'
-                  ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/80'
-                  : 'text-neutral-600 hover:text-neutral-900'
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-purple-600" />
-              <span>Customer Inquiries</span>
-              {pendingInquiriesCount > 0 && (
-                <span className="bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                  {pendingInquiriesCount} New
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab('inventory')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === 'inventory'
-                  ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/80'
-                  : 'text-neutral-600 hover:text-neutral-900'
-              }`}
-            >
-              <Package className="w-3.5 h-3.5" />
-              <span>Inventory Management</span>
-              {soldOutCount > 0 && (
-                <span className="bg-neutral-200 text-neutral-700 text-[10px] font-bold px-1.5 py-0.2 rounded">
-                  {soldOutCount} Sold Out
-                </span>
-              )}
-            </button>
+          {/* Center: High-Contrast Uniform Navigation Links matching Customer Navbar */}
+          <nav className="hidden lg:flex items-center gap-8 shrink-0">
+            {adminNavLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => setActiveTab(link.id)}
+                className={`text-xs uppercase font-bold tracking-wider transition-colors py-1.5 relative flex items-center ${
+                  activeTab === link.id
+                    ? 'text-[#18181b] font-black after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[2px] after:bg-[#18181b]'
+                    : 'text-neutral-700 hover:text-black font-bold'
+                }`}
+              >
+                <span>{link.label}</span>
+                {link.badge && (
+                  <span className={link.badgeClass}>
+                    {link.badge}
+                  </span>
+                )}
+              </button>
+            ))}
           </nav>
 
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
+          {/* Search Bar matching Customer Navbar */}
+          <div className="relative flex-1 max-w-xs sm:max-w-sm hidden md:block">
+            <Search className="w-4 h-4 text-neutral-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none font-bold" />
+            <input
+              type="text"
+              value={currentHeaderSearch}
+              onChange={(e) => handleHeaderSearch(e.target.value)}
+              placeholder={
+                activeTab === 'inventory' 
+                  ? 'Search inventory products, SKU...' 
+                  : activeTab === 'inquiries' 
+                  ? 'Search customer inquiries...' 
+                  : activeTab === 'quotes'
+                  ? 'Search quotations, customer...'
+                  : 'Search catalog & records...'
+              }
+              className="w-full bg-neutral-100 hover:bg-neutral-100/90 focus:bg-white text-xs pl-10 pr-8 py-2.5 rounded-full border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900 placeholder-neutral-500 font-medium transition-all shadow-inner"
+            />
+            {currentHeaderSearch && (
+              <button
+                type="button"
+                onClick={() => handleHeaderSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-neutral-500 hover:text-neutral-900"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Right: Actions (Storefront + Logout + Mobile Hamburger) */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            
+            {/* Customer Storefront Button (matches Track Quote pill style) */}
             <button
               onClick={onExit}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 transition-colors"
-              title="Return to customer website view"
+              className="flex items-center gap-1.5 bg-white hover:bg-neutral-100 active:scale-95 transition-all text-neutral-900 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-full border border-neutral-300 text-xs font-bold shadow-sm"
+              title="Return to customer storefront view"
             >
-              <Store className="w-3.5 h-3.5" />
+              <Store className="w-4 h-4 text-neutral-800" />
               <span className="hidden sm:inline">Customer Store</span>
             </button>
 
+            {/* Admin Logout Button (matches Quotation Cart dark pill style) */}
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-100 transition-colors"
-              title="Log out of admin session"
+              className="flex items-center gap-1.5 bg-[#18181b] hover:bg-red-700 active:scale-95 transition-all text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs font-bold shadow-sm"
+              title="Sign out of admin session"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-4 h-4 text-white" />
               <span className="hidden sm:inline">Logout</span>
+            </button>
+
+            {/* Mobile Menu Hamburger */}
+            <button
+              onClick={() => setAdminMobileMenuOpen(!adminMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl text-neutral-800 hover:text-black hover:bg-neutral-100 transition-colors"
+              aria-label="Toggle navigation menu"
+            >
+              {adminMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
 
         </div>
 
-        {/* Mobile Navigation Tabs */}
-        <div className="md:hidden flex items-center justify-around px-4 py-2.5 border-t border-neutral-200 bg-[#faf9f6] text-xs font-semibold">
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`pb-1 border-b-2 ${activeTab === 'reports' ? 'border-[#18181b] text-[#18181b]' : 'border-transparent text-neutral-700 font-semibold'}`}
-          >
-            Reports
-          </button>
-          <button
-            onClick={() => setActiveTab('quotes')}
-            className={`pb-1 border-b-2 ${activeTab === 'quotes' ? 'border-[#18181b] text-[#18181b]' : 'border-transparent text-neutral-700 font-semibold'}`}
-          >
-            Quotations ({stats.pending_quotes || 0})
-          </button>
-          <button
-            onClick={() => setActiveTab('inventory')}
-            className={`pb-1 border-b-2 ${activeTab === 'inventory' ? 'border-[#18181b] text-[#18181b]' : 'border-transparent text-neutral-700 font-semibold'}`}
-          >
-            Inventory ({products.length})
-          </button>
-        </div>
+        {/* Mobile Search Bar & Menu Dropdown matching Customer Navbar */}
+        {adminMobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-neutral-200 px-6 py-4 space-y-3 shadow-lg animate-fade-in">
+            {/* Mobile Search Input */}
+            <div className="relative w-full mb-3 md:hidden">
+              <Search className="w-4 h-4 text-neutral-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={currentHeaderSearch}
+                onChange={(e) => handleHeaderSearch(e.target.value)}
+                placeholder={
+                  activeTab === 'inventory' 
+                    ? 'Search inventory products, SKU...' 
+                    : activeTab === 'inquiries' 
+                    ? 'Search customer inquiries...' 
+                    : 'Search quotations, customer...'
+                }
+                className="w-full bg-neutral-100 text-xs pl-9 pr-4 py-2.5 rounded-full border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-neutral-900 text-neutral-900 font-medium placeholder-neutral-500"
+              />
+            </div>
+
+            {adminNavLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => {
+                  setActiveTab(link.id);
+                  setAdminMobileMenuOpen(false);
+                }}
+                className={`flex items-center justify-between w-full text-left px-3 py-2.5 rounded-xl text-xs uppercase font-bold tracking-wider ${
+                  activeTab === link.id
+                    ? 'bg-neutral-100 text-[#18181b] font-black'
+                    : 'text-neutral-700 hover:bg-neutral-50 hover:text-black'
+                }`}
+              >
+                <span>{link.label}</span>
+                {link.badge && (
+                  <span className={link.badgeClass}>
+                    {link.badge}
+                  </span>
+                )}
+              </button>
+            ))}
+
+            {/* Mobile Quick Action to Customer Store */}
+            <button
+              onClick={() => {
+                setAdminMobileMenuOpen(false);
+                onExit();
+              }}
+              className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-xl text-xs uppercase font-bold tracking-wider text-[#e67e22] hover:bg-orange-50"
+            >
+              <Store className="w-4 h-4" />
+              <span>Return to Customer Store</span>
+            </button>
+
+            {/* Mobile Logout */}
+            <button
+              onClick={() => {
+                setAdminMobileMenuOpen(false);
+                handleLogout();
+              }}
+              className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-xl text-xs uppercase font-bold tracking-wider text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out of Admin</span>
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Main Admin Portal Container */}
