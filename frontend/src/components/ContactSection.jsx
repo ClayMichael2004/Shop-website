@@ -20,10 +20,33 @@ export default function ContactSection({
 
   const cleanPhone = shopPhone.replace(/\D/g, '');
 
+  const saveInquiryLocally = (inq) => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('kadianga_customer_inquiries') || '[]');
+      const filtered = stored.filter(item => item.quote_number !== inq.quote_number);
+      localStorage.setItem('kadianga_customer_inquiries', JSON.stringify([inq, ...filtered]));
+    } catch (e) {
+      console.warn('Failed to cache inquiry locally:', e);
+    }
+  };
+
   const fallbackLocalSubmit = (payload) => {
     const localRef = `INQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const waText = `Hello Kadianga Electricals,\nI submitted an inquiry on your website [${localRef}]:\n\n*Name:* ${payload.name}\n*Company:* ${payload.company || 'N/A'}\n*Phone:* ${payload.phone}\n*Inquiry Category:* ${payload.inquiry_type}\n*Message:* ${payload.message}\n\nPlease advise on pricing and consultation.`;
     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`;
+    
+    saveInquiryLocally({
+      id: Date.now(),
+      quote_number: localRef,
+      customer_name: payload.company ? `${payload.name} (${payload.company})` : payload.name,
+      customer_email: payload.email,
+      customer_phone: payload.phone,
+      customer_location: `Contact Page • ${payload.inquiry_type === 'retail' ? 'Retail & General' : 'Contractor Project'}`,
+      notes: `[Inquiry Category: ${payload.inquiry_type}]\n${payload.message}`,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    });
+
     setSubmissionResult({
       reference: localRef,
       whatsappLink: waLink,
@@ -55,9 +78,23 @@ export default function ContactSection({
 
       if (res.ok) {
         const data = await res.json();
+        const ref = data.quote_number || `INQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+        
+        saveInquiryLocally({
+          id: Date.now(),
+          quote_number: ref,
+          customer_name: payload.company ? `${payload.name} (${payload.company})` : payload.name,
+          customer_email: payload.email,
+          customer_phone: payload.phone,
+          customer_location: `Contact Page • ${payload.inquiry_type === 'retail' ? 'Retail & General' : 'Contractor Project'}`,
+          notes: `[Inquiry Category: ${payload.inquiry_type}]\n${payload.message}`,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        });
+
         setSubmissionResult({
-          reference: data.quote_number || `INQ-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-          whatsappLink: data.whatsapp_link || `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Kadianga Electricals, inquiry [${data.quote_number}]: ${payload.message}`)}`,
+          reference: ref,
+          whatsappLink: data.whatsapp_link || `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Kadianga Electricals, inquiry [${ref}]: ${payload.message}`)}`,
           name: payload.name,
           message: payload.message
         });

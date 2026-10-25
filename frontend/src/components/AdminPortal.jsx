@@ -5,7 +5,7 @@ import {
   TrendingUp, BarChart3, Coins, CheckCircle2, Clock, 
   Store, LogOut, X, AlertCircle, ToggleLeft, ToggleRight,
   Lock, KeyRound, Shield, Upload, Image as ImageIcon, Mail, ExternalLink, Check,
-  FolderPlus, Tag, AlertTriangle, Info
+  FolderPlus, Tag, AlertTriangle, Info, MessageSquare
 } from 'lucide-react';
 import { cacheProductsOffline } from '../offline/db';
 
@@ -50,6 +50,44 @@ export default function AdminPortal({
   const [savingQuote, setSavingQuote] = useState(false);
   const [quoteFeedbackModal, setQuoteFeedbackModal] = useState(null);
   const [inlineQuoteStatus, setInlineQuoteStatus] = useState(null);
+
+  // Dedicated Customer Inquiries state (Separated from product quotations)
+  const defaultSeedInquiries = [
+    {
+      id: 'seed-inq-1',
+      quote_number: 'INQ-2026-8412',
+      customer_name: 'Eng. Patrick Omondi (Lakeview Construction Ltd)',
+      customer_email: 'omondi.lakeview@gmail.com',
+      customer_phone: '+254722345678',
+      customer_location: 'Contact Page • Contractor Project',
+      notes: '[Inquiry Category: mailing]\nWe are wiring a 4-storey commercial plaza in Kondele. Need pricing for 800m of 16mm² 4-core armoured cable, 50 rolls of 2.5mm² conduit wire, and 3-phase 63A distribution boards. Can you deliver to site in Kondele by Wednesday?',
+      status: 'pending',
+      created_at: new Date(Date.now() - 3600000 * 3).toISOString()
+    },
+    {
+      id: 'seed-inq-2',
+      quote_number: 'INQ-2026-6204',
+      customer_name: 'Grace Achieng (Milimani Villa Project)',
+      customer_email: 'grace.achieng@yahoo.com',
+      customer_phone: '+254733987654',
+      customer_location: 'Contact Page • Retail & General',
+      notes: '[Inquiry Category: retail]\nHi Kadianga team, I saw the Nordic Luxe 5-drop chandelier on your catalog. Do you have 3 sets available in brushed brass at your Ang\'awa showroom, or do they come from Nairobi? Please WhatsApp me details.',
+      status: 'pending',
+      created_at: new Date(Date.now() - 3600000 * 16).toISOString()
+    }
+  ];
+
+  const [inquiries, setInquiries] = useState(() => {
+    try {
+      const stored = localStorage.getItem('kadianga_customer_inquiries');
+      const parsed = stored ? JSON.parse(stored) : [];
+      return parsed.length > 0 ? parsed : defaultSeedInquiries;
+    } catch {
+      return defaultSeedInquiries;
+    }
+  });
+  const [inquiriesFilter, setInquiriesFilter] = useState('all'); // 'all', 'pending', 'responded'
+  const [inquiriesSearch, setInquiriesSearch] = useState('');
 
   // Inventory state
   const [products, setProducts] = useState([]);
@@ -292,7 +330,20 @@ export default function AdminPortal({
       });
       if (res.ok) {
         const data = await res.json();
-        setQuotes(data.quotes || []);
+        const serverQuotes = data.quotes || [];
+        setQuotes(serverQuotes);
+
+        // Merge any server-side contact inquiries into inquiries state
+        const serverInquiries = serverQuotes.filter(q => q.quote_number?.startsWith('INQ-'));
+        if (serverInquiries.length > 0) {
+          setInquiries(prev => {
+            const existingRefs = new Set(prev.map(i => i.quote_number));
+            const fresh = serverInquiries.filter(i => !existingRefs.has(i.quote_number));
+            const merged = [...fresh, ...prev];
+            try { localStorage.setItem('kadianga_customer_inquiries', JSON.stringify(merged)); } catch {}
+            return merged;
+          });
+        }
       }
     } catch (e) {
       console.warn('Failed to fetch quotes:', e);
@@ -990,21 +1041,108 @@ export default function AdminPortal({
     });
   }, [products, inventoryStockFilter, inventoryCategoryFilter, inventorySearch]);
 
-  // Filtered Quotes for Quotes View
+  // Separate Product Quotations from Customer Inquiries
+  const productQuotes = useMemo(() => {
+    return quotes.filter(q => !q.quote_number?.startsWith('INQ-'));
+  }, [quotes]);
+
   const filteredQuotes = useMemo(() => {
-    return quotes.filter(q => {
+    return productQuotes.filter(q => {
+      if (quotesFilter === 'pending' && q.status !== 'pending') return false;
+      if (quotesFilter === 'quoted' && q.status !== 'quoted') return false;
       if (quotesSearch.trim()) {
-        const s = quotesSearch.toLowerCase();
+        const query = quotesSearch.toLowerCase();
         return (
-          (q.quote_number && q.quote_number.toLowerCase().includes(s)) ||
-          (q.customer_name && q.customer_name.toLowerCase().includes(s)) ||
-          (q.customer_phone && q.customer_phone.toLowerCase().includes(s)) ||
-          (q.customer_email && q.customer_email.toLowerCase().includes(s))
+          (q.quote_number && q.quote_number.toLowerCase().includes(query)) ||
+          (q.customer_name && q.customer_name.toLowerCase().includes(query)) ||
+          (q.customer_phone && q.customer_phone.toLowerCase().includes(query)) ||
+          (q.customer_email && q.customer_email.toLowerCase().includes(query))
         );
       }
       return true;
     });
-  }, [quotes, quotesSearch]);
+  }, [productQuotes, quotesFilter, quotesSearch]);
+
+  // Dedicated Filter for Customer Inquiries Tab
+  const filteredInquiries = useMemo(() => {
+    return inquiries.filter(inq => {
+      if (inquiriesFilter === 'pending' && inq.status !== 'pending') return false;
+      if (inquiriesFilter === 'responded' && inq.status !== 'responded') return false;
+      if (inquiriesSearch.trim()) {
+        const query = inquiriesSearch.toLowerCase();
+        return (
+          (inq.quote_number && inq.quote_number.toLowerCase().includes(query)) ||
+          (inq.customer_name && inq.customer_name.toLowerCase().includes(query)) ||
+          (inq.customer_phone && inq.customer_phone.toLowerCase().includes(query)) ||
+          (inq.customer_email && inq.customer_email.toLowerCase().includes(query)) ||
+          (inq.notes && inq.notes.toLowerCase().includes(query))
+        );
+      }
+      return true;
+    });
+  }, [inquiries, inquiriesFilter, inquiriesSearch]);
+
+  const pendingInquiriesCount = useMemo(() => {
+    return inquiries.filter(i => i.status === 'pending').length;
+  }, [inquiries]);
+
+  // Handlers for Inquiries Tab
+  const handleToggleInquiryStatus = (inquiryRef) => {
+    setInquiries(prev => {
+      const next = prev.map(inq => {
+        if (inq.quote_number === inquiryRef || inq.id === inquiryRef) {
+          const nextStatus = inq.status === 'responded' ? 'pending' : 'responded';
+          return { ...inq, status: nextStatus };
+        }
+        return inq;
+      });
+      try { localStorage.setItem('kadianga_customer_inquiries', JSON.stringify(next)); } catch {}
+      return next;
+    });
+    triggerSuccess('Inquiry status updated.');
+  };
+
+  const handleDeleteInquiry = (inquiryRef) => {
+    showPortalConfirm({
+      title: 'Delete Customer Inquiry',
+      message: `Are you sure you want to delete inquiry #${inquiryRef}? This record will be permanently removed.`,
+      confirmText: 'Delete Inquiry',
+      cancelText: 'Cancel',
+      isDanger: true,
+      onConfirm: () => {
+        setInquiries(prev => {
+          const next = prev.filter(inq => inq.quote_number !== inquiryRef && inq.id !== inquiryRef);
+          try { localStorage.setItem('kadianga_customer_inquiries', JSON.stringify(next)); } catch {}
+          return next;
+        });
+        triggerSuccess('Inquiry record deleted.');
+      }
+    });
+  };
+
+  const handleInquiryWhatsApp = (inq) => {
+    const cleanPhone = (inq.customer_phone || '').replace(/\D/g, '');
+    if (!cleanPhone) {
+      showPortalAlert('Phone Number Missing', 'This customer did not provide a phone number for WhatsApp.', 'warning');
+      return;
+    }
+    const validPhone = (cleanPhone.startsWith('0') && cleanPhone.length === 10) 
+      ? `254${cleanPhone.slice(1)}` 
+      : cleanPhone;
+
+    const replyMsg = `Hello ${inq.customer_name},\nThis is Kadianga Electricals Trade Desk regarding your inquiry #${inq.quote_number}.\n\nWe have reviewed your request and are ready to assist you. Please let us know if you need specific cable drums, pricing, or showroom collection.`;
+    window.open(`https://wa.me/${validPhone}?text=${encodeURIComponent(replyMsg)}`, '_blank');
+  };
+
+  const handleInquiryEmail = (inq) => {
+    if (!inq.customer_email) {
+      showPortalAlert('Email Address Missing', 'This customer did not provide an email address.', 'warning');
+      return;
+    }
+    const subject = `Kadianga Electricals - Response to Inquiry #${inq.quote_number}`;
+    const body = `Dear ${inq.customer_name},\n\nThank you for reaching out to Kadianga Electricals regarding your inquiry (#${inq.quote_number}).\n\nWe have reviewed your message:\n"${inq.notes}"\n\nPlease reply to this email or call +254 712 880 970 for direct dispatch coordination.\n\nBest regards,\nKadianga Electricals Supply\nOld Fire Station, Ang'awa Street, Kisumu`;
+    window.open(`mailto:${inq.customer_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  };
 
   const DEFAULT_CATEGORIES = [
     'Armoured Cables',
@@ -1169,18 +1307,31 @@ export default function AdminPortal({
             </button>
 
             <button
-              onClick={() => setActiveTab('quotes')}
+            onClick={() => setActiveTab('quotes')}
+            className={`pb-1 border-b-2 ${activeTab === 'quotes' ? 'border-[#18181b] text-[#18181b]' : 'border-transparent text-neutral-700 font-semibold'}`}
+          >
+            Quotes ({productQuotes.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('inquiries')}
+            className={`pb-1 border-b-2 ${activeTab === 'inquiries' ? 'border-purple-600 text-purple-700 font-bold' : 'border-transparent text-neutral-700 font-semibold'}`}
+          >
+            Inquiries ({inquiries.length})
+          </button>
+
+            <button
+              onClick={() => setActiveTab('inquiries')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === 'quotes'
+                activeTab === 'inquiries'
                   ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/80'
                   : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Quotes &amp; Inquiries</span>
-              {stats.pending_quotes > 0 && (
-                <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.2 rounded">
-                  {stats.pending_quotes}
+              <MessageSquare className="w-3.5 h-3.5 text-purple-600" />
+              <span>Customer Inquiries</span>
+              {pendingInquiriesCount > 0 && (
+                <span className="bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                  {pendingInquiriesCount} New
                 </span>
               )}
             </button>
@@ -1573,7 +1724,7 @@ export default function AdminPortal({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#18181b] font-sans">
-                  Quotations &amp; Customer Inquiries
+                  Product Quotations
                 </h1>
                 <p className="text-neutral-700 font-medium text-xs sm:text-sm mt-1">
                   Review contractor quotations, customer contact messages, calculate wholesale pricing, and reply directly on WhatsApp or Email.
@@ -1730,6 +1881,236 @@ export default function AdminPortal({
                 </div>
               )}
             </div>
+
+          </div>
+        )}
+
+        {/* ============================================================= */}
+        {/* TAB: DEDICATED CUSTOMER INQUIRIES VIEW (CONTACT US PAGE)       */}
+        {/* ============================================================= */}
+        {activeTab === 'inquiries' && (
+          <div className="space-y-6 animate-fade-in">
+            
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#18181b] font-sans">
+                    Customer Inquiries &amp; Messages
+                  </h1>
+                </div>
+                <p className="text-neutral-700 font-medium text-xs sm:text-sm mt-1">
+                  Direct messages submitted by contractors and homeowners via the Contact Us page on your website.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-purple-50 text-purple-800 border border-purple-200">
+                  {inquiries.length} Total Received
+                </span>
+                <button
+                  onClick={fetchQuotes}
+                  className="p-2.5 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 transition-colors shadow-sm"
+                  title="Check for new inquiries"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingQuotes ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter and Search Bar */}
+            <div className="bg-white rounded-2xl p-4 border border-neutral-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              
+              {/* Filter Pills */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setInquiriesFilter('all')}
+                  className={`text-xs font-semibold px-4 py-2 rounded-xl transition-all ${
+                    inquiriesFilter === 'all'
+                      ? 'bg-[#18181b] text-white shadow-sm'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 font-medium'
+                  }`}
+                >
+                  All ({inquiries.length})
+                </button>
+                <button
+                  onClick={() => setInquiriesFilter('pending')}
+                  className={`text-xs font-semibold px-4 py-2 rounded-xl transition-all ${
+                    inquiriesFilter === 'pending'
+                      ? 'bg-amber-600 text-white shadow-sm'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 font-medium'
+                  }`}
+                >
+                  New / Pending ({inquiries.filter(i => i.status === 'pending').length})
+                </button>
+                <button
+                  onClick={() => setInquiriesFilter('responded')}
+                  className={`text-xs font-semibold px-4 py-2 rounded-xl transition-all ${
+                    inquiriesFilter === 'responded'
+                      ? 'bg-emerald-700 text-white shadow-sm'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 font-medium'
+                  }`}
+                >
+                  Responded ({inquiries.filter(i => i.status === 'responded').length})
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                <input
+                  type="text"
+                  placeholder="Search customer, phone, message text..."
+                  value={inquiriesSearch}
+                  onChange={(e) => setInquiriesSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-neutral-50 border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-[#e67e22] text-neutral-800"
+                />
+              </div>
+
+            </div>
+
+            {/* Inquiries List View */}
+            {filteredInquiries.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-3xl border border-neutral-200 p-8">
+                <MessageSquare className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+                <p className="text-base font-bold text-neutral-900 mb-1">No Inquiries Found</p>
+                <p className="text-xs text-neutral-600">
+                  {inquiriesSearch ? 'Try adjusting your search keywords.' : 'No customer inquiries in this category.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredInquiries.map((inq) => (
+                  <div 
+                    key={inq.quote_number || inq.id}
+                    className="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow space-y-4"
+                  >
+                    {/* Top Row: Ref #, Category, Timestamp, Status */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 bg-neutral-100 px-2.5 py-1 rounded-lg">
+                          #{inq.quote_number}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                          {inq.customer_location?.replace('Contact Page • ', '') || 'Contact Inquiry'}
+                        </span>
+                        <span className="text-xs text-neutral-500 font-medium">
+                          {inq.created_at ? new Date(inq.created_at).toLocaleString() : 'Recent'}
+                        </span>
+                      </div>
+
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        inq.status === 'responded'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          : 'bg-amber-100 text-amber-800 border border-amber-200'
+                      }`}>
+                        {inq.status === 'responded' ? '✓ Responded' : '● New / Pending'}
+                      </span>
+                    </div>
+
+                    {/* Customer Identity Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                      <div>
+                        <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">
+                          Customer / Contractor
+                        </span>
+                        <span className="text-sm font-bold text-neutral-900 block">
+                          {inq.customer_name}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">
+                          Phone Number
+                        </span>
+                        <a 
+                          href={`tel:${inq.customer_phone}`}
+                          className="text-xs font-semibold text-neutral-900 hover:text-[#e67e22] flex items-center gap-1.5"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-neutral-500" />
+                          <span>{inq.customer_phone || 'Not provided'}</span>
+                        </a>
+                      </div>
+
+                      <div>
+                        <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block mb-0.5">
+                          Email Address
+                        </span>
+                        <a 
+                          href={`mailto:${inq.customer_email}`}
+                          className="text-xs font-semibold text-neutral-900 hover:text-[#e67e22] flex items-center gap-1.5 truncate"
+                        >
+                          <Mail className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                          <span className="truncate">{inq.customer_email || 'Not provided'}</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Highlighted Message Card: FULL DETAILS VISIBLE */}
+                    <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs sm:text-sm text-neutral-900">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-amber-900 block mb-1">
+                        Customer Message / Project Inquiry:
+                      </span>
+                      <p className="whitespace-pre-line leading-relaxed font-medium">
+                        {inq.notes ? inq.notes.replace(/\[Inquiry Category:[^\]]+\]\n?/, '') : 'No message body provided.'}
+                      </p>
+                    </div>
+
+                    {/* Action Buttons Toolbar */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleInquiryStatus(inq.quote_number || inq.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors border ${
+                            inq.status === 'responded'
+                              ? 'border-neutral-300 text-neutral-700 hover:bg-neutral-100'
+                              : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                          }`}
+                        >
+                          {inq.status === 'responded' ? 'Mark as Pending' : 'Mark as Responded'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteInquiry(inq.quote_number || inq.id)}
+                          className="p-2 rounded-xl text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          title="Delete inquiry"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {inq.customer_email && (
+                          <button
+                            type="button"
+                            onClick={() => handleInquiryEmail(inq)}
+                            className="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                          >
+                            <Mail className="w-3.5 h-3.5" />
+                            <span>Reply via Email</span>
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleInquiryWhatsApp(inq)}
+                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 active:scale-95"
+                        >
+                          <MessageCircle className="w-4 h-4 fill-white" />
+                          <span>Chat on WhatsApp</span>
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                ))}
+              </div>
+            )}
 
           </div>
         )}
