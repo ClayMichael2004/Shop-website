@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, Phone, MessageCircle, Mail } from 'lucide-react';
 
-export default function Footer({ onNavigate, onOpenTrackQuote }) {
+export default function Footer({ onNavigate, onOpenTrackQuote, onOpenPrivacyTerms }) {
   const [timeStr, setTimeStr] = useState('1:24 PM');
 
   useEffect(() => {
@@ -74,6 +74,13 @@ export default function Footer({ onNavigate, onOpenTrackQuote }) {
               <li>
                 <button onClick={onOpenTrackQuote} className="text-[#e67e22] hover:underline font-bold">
                   Track My Quote
+                </button>
+              </li>
+            )}
+            {onOpenPrivacyTerms && (
+              <li>
+                <button onClick={onOpenPrivacyTerms} className="hover:text-black transition-colors font-medium">
+                  Privacy &amp; Terms
                 </button>
               </li>
             )}
@@ -161,6 +168,15 @@ export default function Footer({ onNavigate, onOpenTrackQuote }) {
           <span>Kadianga Electricals ©2026</span>
           <span className="hidden sm:inline">·</span>
           <span>Quality Certified Supplies</span>
+          <span className="hidden sm:inline">·</span>
+          {onOpenPrivacyTerms && (
+            <button 
+              onClick={onOpenPrivacyTerms} 
+              className="hover:text-black hover:underline font-semibold text-neutral-600 cursor-pointer"
+            >
+              Privacy &amp; Terms (KDPA)
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 sm:gap-3 text-center sm:text-right">

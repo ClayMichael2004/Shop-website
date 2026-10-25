@@ -15,6 +15,8 @@ import ErrorPage from './components/ErrorPage';
 import AdminPortal from './components/AdminPortal';
 import AdminLogin from './components/AdminLogin';
 import TrackQuoteModal from './components/TrackQuoteModal';
+import CookieConsent from './components/CookieConsent';
+import PrivacyTermsModal from './components/PrivacyTermsModal';
 import { 
   cacheProductsOffline, 
   getCachedProductsOffline, 
@@ -73,6 +75,7 @@ export default function App() {
   const [trackQuotePrefill, setTrackQuotePrefill] = useState('');
   const [syncAlert, setSyncAlert] = useState('');
   const [cartToast, setCartToast] = useState(null);
+  const [isPrivacyTermsOpen, setIsPrivacyTermsOpen] = useState(false);
   const [errorState, setErrorState] = useState(null);
 
   // Fallback comprehensive seed products in case server is starting or offline
@@ -633,6 +636,7 @@ export default function App() {
           setTrackQuotePrefill('');
           setIsTrackQuoteOpen(true);
         }}
+        onOpenPrivacyTerms={() => setIsPrivacyTermsOpen(true)}
       />
 
       {/* Product Detail Modal (Alibaba / Amazon style) */}
@@ -682,6 +686,17 @@ export default function App() {
         apiBase={API_BASE}
         companyPhone="+254712880970"
         companyWhatsApp="254712880970"
+      />
+
+      {/* Customer Privacy & Terms Modal (KDPA 2019 & Quotation Terms) */}
+      <PrivacyTermsModal
+        isOpen={isPrivacyTermsOpen}
+        onClose={() => setIsPrivacyTermsOpen(false)}
+      />
+
+      {/* Floating Customer Privacy & Essential Storage Notice */}
+      <CookieConsent
+        onOpenPrivacyTerms={() => setIsPrivacyTermsOpen(true)}
       />
 
       {/* Floating Instant Toast Notification when Quick-Adding to Cart */}
