@@ -1177,7 +1177,7 @@ export default function AdminPortal({
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>Quotations</span>
+              <span>Quotes &amp; Inquiries</span>
               {stats.pending_quotes > 0 && (
                 <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.2 rounded">
                   {stats.pending_quotes}
@@ -1573,10 +1573,10 @@ export default function AdminPortal({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#18181b] font-sans">
-                  Contractor Quotations
+                  Quotations &amp; Customer Inquiries
                 </h1>
                 <p className="text-neutral-700 font-medium text-xs sm:text-sm mt-1">
-                  Review specifications, calculate wholesale pricing, dispatch PDF emails, and reply on WhatsApp.
+                  Review contractor quotations, customer contact messages, calculate wholesale pricing, and reply directly on WhatsApp or Email.
                 </p>
               </div>
 
