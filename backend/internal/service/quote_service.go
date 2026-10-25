@@ -528,3 +528,106 @@ func generateQuoteNumber() string {
 	year := time.Now().Year()
 	return fmt.Sprintf("EQ-%d-%s-%s", year, string(b[:4]), string(b[4:]))
 }
+
+func generateInquiryNumber() string {
+	const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+	b := make([]byte, 6)
+	if _, err := cryptorand.Read(b); err != nil {
+		return fmt.Sprintf("INQ-%d-%d", time.Now().Year(), time.Now().UnixNano()%100000)
+	}
+	for i := range b {
+		b[i] = charset[int(b[i])%len(charset)]
+	}
+	return fmt.Sprintf("INQ-%d-%s", time.Now().Year(), string(b))
+}
+
+// CreateContactInquiry processes inquiries from the Contact Us page and stores them in the quote/inquiry operations queue.
+func (s *QuoteService) CreateContactInquiry(input *models.ContactInquiryInput) (*CreateQuoteResponse, error) {
+	name := strings.TrimSpace(input.Name)
+	company := strings.TrimSpace(input.Company)
+	email := strings.TrimSpace(input.Email)
+	phone := strings.TrimSpace(input.Phone)
+	inquiryType := strings.TrimSpace(input.InquiryType)
+	message := strings.TrimSpace(input.Message)
+
+	if name == "" {
+		return nil, fmt.Errorf("name is required")
+	}
+	if email == "" && phone == "" {
+		return nil, fmt.Errorf("either phone number or email is required")
+	}
+	if message == "" {
+		return nil, fmt.Errorf("message is required")
+	}
+
+	fullName := name
+	if company != "" {
+		fullName = fmt.Sprintf("%s (%s)", name, company)
+	}
+
+	if inquiryType == "" {
+		inquiryType = "General Consultation"
+	}
+
+	notes := fmt.Sprintf("[Inquiry Category: %s]\n%s", strings.Title(inquiryType), message)
+	location := fmt.Sprintf("Contact Page • %s", strings.Title(inquiryType))
+
+	inquiryNum := generateInquiryNumber()
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	insertQuery := `
+		INSERT INTO quote_requests (
+			quote_number, customer_name, customer_email, customer_phone,
+			customer_location, notes, preferred_contact, status,
+			subtotal, discount, delivery_fee, grand_total,
+			admin_notes, created_at, updated_at
+		) VALUES (?, ?, ?, ?, ?, ?, 'both', 'pending', 0.0, 0.0, 0.0, 0.0, 'Submitted via Contact Us page', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+	`
+	res, err := tx.Exec(insertQuery, inquiryNum, fullName, email, phone, location, notes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert contact inquiry: %w", err)
+	}
+
+	quoteID, err := res.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve inquiry id: %w", err)
+	}
+
+	// Insert descriptive quote item so items table has reference
+	itemQuery := `
+		INSERT INTO quote_items (
+			quote_id, product_id, product_name, product_sku, product_image,
+			quantity, quoted_unit_price, quoted_total_price, specs_notes
+		) VALUES (?, 0, ?, 'INQ-CONSULT', '/images/contacthero.jpg', 1, 0.0, 0.0, ?)
+	`
+	itemDesc := fmt.Sprintf("Direct %s Inquiry", strings.Title(inquiryType))
+	if _, err := tx.Exec(itemQuery, quoteID, itemDesc, message); err != nil {
+		return nil, fmt.Errorf("failed to insert inquiry item: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	fullQuote, err := s.GetQuoteByID(quoteID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve created inquiry: %w", err)
+	}
+
+	rawMsg, waLink := s.whatsApp.BuildContactInquiryMessage(name, company, phone, email, inquiryType, message, inquiryNum)
+
+	return &CreateQuoteResponse{
+		QuoteNumber:  inquiryNum,
+		ID:           quoteID,
+		WhatsAppLink: waLink,
+		WhatsAppText: rawMsg,
+		Status:       "pending",
+		Message:      "Your inquiry has been received and logged in the Kadianga Operations Dashboard.",
+		Quote:        fullQuote,
+	}, nil
+}

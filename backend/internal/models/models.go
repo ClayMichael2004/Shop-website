@@ -90,6 +90,16 @@ type QuoteSyncPayload struct {
 	Quotes []CreateQuoteInput `json:"quotes"`
 }
 
+// ContactInquiryInput is the payload sent from the Contact Us page.
+type ContactInquiryInput struct {
+	Name        string `json:"name"`
+	Company     string `json:"company"`
+	Email       string `json:"email"`
+	Phone       string `json:"phone"`
+	InquiryType string `json:"inquiry_type"`
+	Message     string `json:"message"`
+}
+
 // AdminStats provides an overview dashboard count.
 type AdminStats struct {
 	TotalQuotes   int     `json:"total_quotes"`

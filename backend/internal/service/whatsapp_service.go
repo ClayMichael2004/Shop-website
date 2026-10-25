@@ -89,6 +89,34 @@ func (w *WhatsAppService) BuildShopOwnerReplyMessage(quote *models.QuoteRequest)
 	return rawMsg, link
 }
 
+// BuildContactInquiryMessage generates the WhatsApp text and link for a contact page inquiry.
+func (w *WhatsAppService) BuildContactInquiryMessage(name, company, phone, email, inquiryType, message, inquiryNum string) (string, string) {
+	var sb strings.Builder
+	sb.WriteString("*KADIANGA ELECTRICALS - DIRECT TRADE INQUIRY*\n\n")
+	sb.WriteString(fmt.Sprintf("*Inquiry Ref:* #%s\n", inquiryNum))
+	sb.WriteString(fmt.Sprintf("*Name:* %s\n", name))
+	if company != "" {
+		sb.WriteString(fmt.Sprintf("*Company:* %s\n", company))
+	}
+	if phone != "" {
+		sb.WriteString(fmt.Sprintf("*Phone:* %s\n", phone))
+	}
+	if email != "" {
+		sb.WriteString(fmt.Sprintf("*Email:* %s\n", email))
+	}
+	if inquiryType != "" {
+		sb.WriteString(fmt.Sprintf("*Inquiry Category:* %s\n", inquiryType))
+	}
+	sb.WriteString(fmt.Sprintf("\n*Message / Requirements:*\n%s\n", message))
+	sb.WriteString("\n_Sent via Kadianga Electricals Contact Desk._")
+
+	rawMsg := sb.String()
+	cleanPhone := cleanPhoneNumber(w.cfg.ShopWhatsApp)
+	link := fmt.Sprintf("https://wa.me/%s?text=%s", cleanPhone, url.QueryEscape(rawMsg))
+
+	return rawMsg, link
+}
+
 func cleanPhoneNumber(phone string) string {
 	var b strings.Builder
 	for _, r := range phone {

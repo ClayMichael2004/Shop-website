@@ -117,6 +117,24 @@ func (h *APIHandler) CreateQuote(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, res)
 }
 
+// Public Submit Contact Inquiry (No authentication required)
+func (h *APIHandler) HandleContactSubmission(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // 1MB payload limit
+	var input models.ContactInquiryInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid contact payload: "+err.Error())
+		return
+	}
+
+	res, err := h.quoteSvc.CreateContactInquiry(&input)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondJSON(w, http.StatusCreated, res)
+}
+
 // Public Track Quote by Quote Number (Returns sanitized non-PII tracking details)
 func (h *APIHandler) TrackQuote(w http.ResponseWriter, r *http.Request) {
 	quoteNum := r.URL.Query().Get("number")

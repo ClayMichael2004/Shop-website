@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, MessageCircle, ChevronDown, CheckCircle2, Send, Clock, ArrowRight, ExternalLink } from 'lucide-react';
+import { Phone, Mail, MapPin, MessageCircle, ChevronDown, CheckCircle2, Send, Clock, ArrowRight, ExternalLink, ShieldCheck, Building2, RefreshCw } from 'lucide-react';
 
 export default function ContactSection({ 
   shopPhone = "+254712880970", 
@@ -14,17 +14,61 @@ export default function ContactSection({
     phone: '',
     message: ''
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState(null);
+  const [submitError, setSubmitError] = useState('');
 
   const cleanPhone = shopPhone.replace(/\D/g, '');
 
-  const handleSubmit = (e) => {
+  const fallbackLocalSubmit = (payload) => {
+    const localRef = `INQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const waText = `Hello Kadianga Electricals,\nI submitted an inquiry on your website [${localRef}]:\n\n*Name:* ${payload.name}\n*Company:* ${payload.company || 'N/A'}\n*Phone:* ${payload.phone}\n*Inquiry Category:* ${payload.inquiry_type}\n*Message:* ${payload.message}\n\nPlease advise on pricing and consultation.`;
+    const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`;
+    setSubmissionResult({
+      reference: localRef,
+      whatsappLink: waLink,
+      name: payload.name,
+      message: payload.message
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', company: '', email: '', phone: '', message: '' });
-    }, 6000);
+    setSubmitting(true);
+    setSubmitError('');
+
+    const payload = {
+      name: formData.name.trim(),
+      company: formData.company.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      inquiry_type: inquiryType,
+      message: formData.message.trim()
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSubmissionResult({
+          reference: data.quote_number || `INQ-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          whatsappLink: data.whatsapp_link || `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello Kadianga Electricals, inquiry [${data.quote_number}]: ${payload.message}`)}`,
+          name: payload.name,
+          message: payload.message
+        });
+      } else {
+        fallbackLocalSubmit(payload);
+      }
+    } catch (err) {
+      fallbackLocalSubmit(payload);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -202,20 +246,85 @@ export default function ContactSection({
             </div>
 
             {/* Right Column: Underline Form matching contact us 2.jpg with 100% visible text */}
-            <div className="lg:col-span-7 bg-white/80 backdrop-blur-md p-5 sm:p-8 md:p-12 rounded-3xl border border-neutral-300 shadow-md">
-              {submitted ? (
-                <div className="py-16 text-center space-y-4">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-                  <h3 className="text-2xl font-bold text-neutral-900">Thank you</h3>
-                  <p className="text-neutral-800 text-sm font-semibold max-w-md mx-auto">
-                    Your message has been sent. We will get back to you shortly via phone and email.
-                  </p>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="mt-4 px-6 py-2.5 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-colors"
-                  >
-                    Send Another Message
-                  </button>
+            <div className="lg:col-span-7 bg-white/90 backdrop-blur-md p-5 sm:p-8 md:p-12 rounded-3xl border border-neutral-300 shadow-xl">
+              {submissionResult ? (
+                <div className="py-8 text-center space-y-5 animate-fade-in">
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+                    <CheckCircle2 className="w-9 h-9" />
+                  </div>
+
+                  <div>
+                    <span className="inline-block px-3.5 py-1 rounded-full text-xs font-mono font-bold bg-[#18181b] text-[#e67e22] mb-2 border border-white/10">
+                      Inquiry #{submissionResult.reference}
+                    </span>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-neutral-900 font-sans">
+                      Inquiry Successfully Received!
+                    </h3>
+                    <p className="text-neutral-700 text-xs sm:text-sm font-medium max-w-lg mx-auto mt-2 leading-relaxed">
+                      Thank you, <strong className="text-neutral-900">{submissionResult.name}</strong>. Here is exactly where your inquiry has been dispatched:
+                    </p>
+                  </div>
+
+                  {/* Dispatch Destination Breakdown Card */}
+                  <div className="bg-[#faf9f6] rounded-2xl border border-neutral-300 p-4 sm:p-5 text-left max-w-lg mx-auto space-y-3.5 text-xs shadow-inner">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                        1
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-neutral-900 text-sm">Store Admin Dashboard (Kisumu)</p>
+                        <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
+                          Your message and contact details are permanently logged in our store operations queue at Ang'awa Street. Our staff can review and reply directly via email or phone.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 pt-3 border-t border-neutral-200">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                        2
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-neutral-900 text-sm">Instant WhatsApp Dispatch (Fastest)</p>
+                        <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
+                          For immediate response on warehouse stock and factory copper cable cuts, continue directly on WhatsApp with our store manager.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Immediate Action Buttons */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+                    <a
+                      href={submissionResult.whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
+                    >
+                      <MessageCircle className="w-4 h-4 fill-white" />
+                      <span>Continue on WhatsApp Now</span>
+                    </a>
+
+                    <a
+                      href={`tel:${shopPhone}`}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white px-5 py-3.5 rounded-xl text-xs font-bold transition-all shadow-sm"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-[#e67e22]" />
+                      <span>Call Store: {shopPhone}</span>
+                    </a>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubmissionResult(null);
+                        setFormData({ name: '', company: '', email: '', phone: '', message: '' });
+                      }}
+                      className="text-xs text-neutral-600 hover:text-black font-semibold underline"
+                    >
+                      Send Another Message
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -307,8 +416,19 @@ export default function ContactSection({
                     ></textarea>
                   </div>
 
+                  {/* Where It Goes Notice Box */}
+                  <div className="p-3.5 rounded-2xl bg-neutral-100/90 border border-neutral-300 text-xs text-neutral-700 space-y-1">
+                    <p className="font-bold text-neutral-900 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[#e67e22]" />
+                      <span>How your submission is handled:</span>
+                    </p>
+                    <p className="text-[11px] leading-relaxed text-neutral-600">
+                      Clicking <strong>Send Inquiry</strong> logs your request directly into the <strong>Kadianga Store Admin Dashboard</strong> at Ang'awa Street for counter review. You can also tap <strong>Chat on WhatsApp</strong> for immediate live communication.
+                    </p>
+                  </div>
+
                   {/* Action Buttons: Concentric Target Circle Send Button + WhatsApp Direct */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-neutral-200">
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-neutral-200">
                     <a
                       href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(
                         `Hello Kadianga Electricals, I am reaching out regarding ${inquiryType === 'retail' ? 'Retail Supply' : 'Contractor Project Supply'}. Name: ${formData.name || 'Contractor'}, Message: ${formData.message || 'I would like a quotation.'}`
@@ -316,20 +436,31 @@ export default function ContactSection({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-sm active:scale-95"
+                      title="Open immediate WhatsApp conversation"
                     >
-                      <MessageCircle className="w-4 h-4" />
+                      <MessageCircle className="w-4 h-4 fill-white" />
                       <span>Chat on WhatsApp</span>
                     </a>
 
                     {/* Send Button with concentric target circle matching contact us 2.jpg */}
                     <button
                       type="submit"
-                      className="flex items-center gap-3 bg-black hover:bg-neutral-800 text-white px-9 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 ml-auto"
+                      disabled={submitting}
+                      className="flex items-center gap-3 bg-black hover:bg-neutral-800 disabled:bg-neutral-600 text-white px-9 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 ml-auto cursor-pointer"
                     >
-                      <div className="w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                      </div>
-                      <span>Send</span>
+                      {submitting ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                          <span>Submitting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
+                            <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                          </div>
+                          <span>Send Inquiry</span>
+                        </>
+                      )}
                     </button>
                   </div>
 

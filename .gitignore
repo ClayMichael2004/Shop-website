@@ -4,8 +4,8 @@
 *.dll
 *.so
 *.dylib
-server
 /backend/server
+/backend/cmd/server/server
 
 # SQLite databases & runtime storage
 *.db

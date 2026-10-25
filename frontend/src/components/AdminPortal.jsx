@@ -1667,8 +1667,15 @@ export default function AdminPortal({
                       {filteredQuotes.map((q) => (
                         <tr key={q.id} className="hover:bg-neutral-50/80 transition-colors">
                           <td className="py-4 px-6 font-mono font-bold text-neutral-900">
-                            {q.quote_number}
-                            <span className="block text-[10px] text-neutral-600 font-medium">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span>{q.quote_number}</span>
+                              {q.quote_number?.startsWith('INQ-') && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                  Contact Inquiry
+                                </span>
+                              )}
+                            </div>
+                            <span className="block text-[10px] text-neutral-600 font-medium mt-0.5">
                               {q.created_at ? new Date(q.created_at).toLocaleDateString() : 'Today'}
                             </span>
                           </td>
@@ -1682,12 +1689,22 @@ export default function AdminPortal({
                             )}
                           </td>
                           <td className="py-4 px-6">
-                            <span className="font-semibold text-neutral-800">
-                              {q.items ? q.items.length : 1} product line{q.items && q.items.length > 1 ? 's' : ''}
-                            </span>
+                            {q.quote_number?.startsWith('INQ-') ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-purple-900 text-xs">
+                                💬 Consultation Inquiry
+                              </span>
+                            ) : (
+                              <span className="font-semibold text-neutral-800">
+                                {q.items ? q.items.length : 1} product line{q.items && q.items.length > 1 ? 's' : ''}
+                              </span>
+                            )}
                           </td>
                           <td className="py-4 px-6 font-mono font-bold text-neutral-900">
-                            {q.grand_total > 0 ? `KSh ${Number(q.grand_total).toLocaleString()}` : 'Pending Pricing'}
+                            {q.quote_number?.startsWith('INQ-') ? (
+                              <span className="text-xs text-neutral-500 font-medium">Direct Inquiry</span>
+                            ) : (
+                              q.grand_total > 0 ? `KSh ${Number(q.grand_total).toLocaleString()}` : 'Pending Pricing'
+                            )}
                           </td>
                           <td className="py-4 px-6">
                             <span className={`px-2.5 py-0.5 rounded text-[11px] font-medium ${
@@ -1703,7 +1720,7 @@ export default function AdminPortal({
                               onClick={() => handleOpenQuote(q)}
                               className="px-3.5 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#e67e22] text-white font-semibold text-xs active:scale-95 transition-all shadow-sm"
                             >
-                              Price &amp; Respond
+                              {q.quote_number?.startsWith('INQ-') ? 'View & Reply' : 'Price & Respond'}
                             </button>
                           </td>
                         </tr>
@@ -2010,6 +2027,12 @@ export default function AdminPortal({
             <div className="p-6 space-y-6 flex-1 overflow-y-auto">
               
               {/* Customer Contact & Notes Banner */}
+              {selectedQuote.quote_number?.startsWith('INQ-') && (
+                <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-200 text-xs font-semibold text-purple-900 flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-purple-600 shrink-0" />
+                  <span>Submitted via Contact Us Page (Direct Contractor Consultation)</span>
+                </div>
+              )}
               <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-xs space-y-1.5 text-neutral-700">
                 <p><strong>Customer Phone:</strong> {selectedQuote.customer_phone || 'N/A'}</p>
                 <p><strong>Customer Email:</strong> {selectedQuote.customer_email || 'N/A'}</p>
