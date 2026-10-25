@@ -12,6 +12,7 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorPage from './components/ErrorPage';
+import ErrorBoundary from './components/ErrorBoundary';
 import AdminPortal from './components/AdminPortal';
 import AdminLogin from './components/AdminLogin';
 import TrackQuoteModal from './components/TrackQuoteModal';
@@ -513,12 +514,14 @@ export default function App() {
   if (isAdminRoute) {
     if (adminAuth) {
       return (
-        <AdminPortal
-          apiBase={API_BASE}
-          adminToken={adminAuth?.token || ""}
-          onExit={handleExitAdmin}
-          onLogout={handleAdminLogout}
-        />
+        <ErrorBoundary onReset={handleExitAdmin}>
+          <AdminPortal
+            apiBase={API_BASE}
+            adminToken={adminAuth?.token || ""}
+            onExit={handleExitAdmin}
+            onLogout={handleAdminLogout}
+          />
+        </ErrorBoundary>
       );
     }
     return (

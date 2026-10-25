@@ -5,7 +5,7 @@ import {
   TrendingUp, BarChart3, Coins, CheckCircle2, Clock, 
   Store, LogOut, X, AlertCircle, ToggleLeft, ToggleRight,
   Lock, KeyRound, Shield, Upload, Image as ImageIcon, Mail, ExternalLink, Check,
-  FolderPlus, Tag, AlertTriangle, Info, MessageSquare, Menu
+  FolderPlus, Tag, AlertTriangle, Info, MessageSquare, Menu, Phone
 } from 'lucide-react';
 import { cacheProductsOffline } from '../offline/db';
 

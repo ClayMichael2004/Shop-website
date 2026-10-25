@@ -4,20 +4,25 @@ import { ShieldCheck } from 'lucide-react';
 export default function LoadingScreen({ message = "Loading...", onComplete }) {
   const [progress, setProgress] = useState(15);
 
+    useEffect(() => {
+    if (progress >= 100) {
+      if (onComplete) onComplete();
+    }
+  }, [progress, onComplete]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(timer);
-          if (onComplete) onComplete();
           return 100;
         }
-        return prev + Math.floor(Math.random() * 20) + 10;
+        return Math.min(100, prev + Math.floor(Math.random() * 20) + 10);
       });
     }, 180);
 
     return () => clearInterval(timer);
-  }, [onComplete]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm p-4 animate-fade-in">
