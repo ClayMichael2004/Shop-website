@@ -284,6 +284,176 @@ export default function App() {
       rating: 4.8,
       reviews_count: 31,
       featured: false
+    },
+    {
+      id: 13,
+      sku: "FIT-SWT-2G2W",
+      name: "Schneider Style 2-Gang 2-Way Flush Rocker Light Switch (Matt White)",
+      slug: "schneider-style-2gang-2way-light-switch",
+      category: "Electrical Fittings",
+      subcategory: "Wall Switches & Faceplates",
+      short_description: "High-durability 16AX 2-gang 2-way modular rocker wall switch with flame-retardant polycarbonate housing.",
+      full_description: "Engineered for reliable domestic and commercial lighting control. Features silver alloy contact points, smooth tactile switching action, and antibacterial scratch-resistant surface finish. Standard 86x86mm flush mounting.",
+      image_url: "/images/items section layout.jpg",
+      specs: '{"Gang": "2-Gang", "Way": "2-Way Switching", "Rating": "16AX 250V AC", "Material": "UV-Stabilized Flame-Retardant Polycarbonate", "Standard": "IEC 60669-1"}',
+      in_stock: true,
+      base_estimate_price: 1250.00,
+      rating: 4.9,
+      reviews_count: 44,
+      featured: false
+    },
+    {
+      id: 14,
+      sku: "FIT-JNC-IP66",
+      name: "IP66 Waterproof Exterior Adaptable Junction Box with M20 Glands",
+      slug: "ip66-waterproof-exterior-junction-box",
+      category: "Electrical Fittings",
+      subcategory: "Conduit & Junction Fittings",
+      short_description: "Weatherproof and dust-tight heavy PVC junction box with rubber gasket seals and multi-directional cable knockout entries.",
+      full_description: "Designed for outdoor security lighting, perimeter wiring, and industrial conduit branches. Includes captive stainless steel screws and silicone sealing gasket for dependable IP66 ingress protection.",
+      image_url: "/images/twin cable and others.jpg",
+      specs: '{"Dimensions": "150 x 110 x 70 mm", "Protection": "IP66 Dust & Water Jet Proof", "Entries": "10 Knockout Gland Ports (M20)", "Material": "High Impact ABS"}',
+      in_stock: true,
+      base_estimate_price: 950.00,
+      rating: 4.8,
+      reviews_count: 28,
+      featured: false
+    },
+    {
+      id: 15,
+      sku: "ELC-AVR-5KVA",
+      name: "Digital Heavy-Duty Automatic Voltage Regulator (AVR / Stabilizer 5000VA)",
+      slug: "digital-avr-voltage-stabilizer-5000va",
+      category: "Electronics & Appliances",
+      subcategory: "Voltage Stabilizers & Regulators",
+      short_description: "Microprocessor-controlled servo motor voltage stabilizer protecting sensitive electronics, compressors, and pumps against brownouts and power surges.",
+      full_description: "Reliable voltage regulation for home, office, and light industrial equipment. Wide input voltage tolerance (130V - 260V AC) delivering stable 230V output. Dual digital meter displays real-time input and output voltages.",
+      image_url: "/images/power.jpg",
+      specs: '{"Capacity": "5000VA / 5kVA", "Input Range": "130V - 260V AC", "Output Voltage": "230V AC ±2%", "Display": "Dual Digital LED", "Protection": "High/Low Voltage, Overload & Delay"}',
+      in_stock: true,
+      base_estimate_price: 19500.00,
+      rating: 4.9,
+      reviews_count: 36,
+      featured: true
+    },
+    {
+      id: 16,
+      sku: "ELC-EXT-SURG",
+      name: "Industrial 4-Way Heavy Duty Surge Protected Extension Cable Reel (25 Metres)",
+      slug: "industrial-heavy-duty-extension-reel-25m",
+      category: "Electronics & Appliances",
+      subcategory: "Extensions & Surge Protection",
+      short_description: "Rugged steel framed portable cable extension drum reel with thermal overload circuit breaker and 4 shuttered 13A safety sockets.",
+      full_description: "Contractor grade extension reel equipped with 25 metres of 3-core 1.5mm² flexible heavy duty PVC cable. Built-in thermal cutout switch prevents dangerous overheating during heavy continuous power tool operation.",
+      image_url: "/images/armured cable.jpg",
+      specs: '{"Cable Length": "25 Metres", "Cable Type": "3-Core 1.5mm² Heavy Duty", "Sockets": "4x 13A Shuttered Outlets", "Safety": "Thermal Cutout Reset Switch", "Max Load": "3120W Fully Uncoiled"}',
+      in_stock: true,
+      base_estimate_price: 6800.00,
+      rating: 4.8,
+      reviews_count: 21,
+      featured: false
+    },
+    {
+      id: 17,
+      sku: "SOL-PNL-550W",
+      name: "Tier-1 Monocrystalline Half-Cell High Efficiency Solar Panel (550W)",
+      slug: "tier-1-monocrystalline-solar-panel-550w",
+      category: "Solar Systems & Accessories",
+      subcategory: "Solar PV Panels",
+      short_description: "Ultra-high efficiency monocrystalline PERC half-cut solar PV module engineered for rooftop residential and off-grid contractor installations.",
+      full_description: "Delivers maximum kilowatt output even in low ambient light or high temperature conditions. Features multi-busbar technology for reduced resistance losses, anti-reflective tempered glass, and anodized aluminum frame.",
+      image_url: "/images/herosection.webp",
+      specs: '{"Peak Power (Pmax)": "550W", "Efficiency": "21.3%", "Cell Type": "Monocrystalline Half-Cut PERC", "Frame": "Anodized Corrosion-Resistant Aluminum", "Warranty": "25 Years Linear Power Output"}',
+      in_stock: true,
+      base_estimate_price: 17500.00,
+      rating: 5.0,
+      reviews_count: 53,
+      featured: true
+    },
+    {
+      id: 18,
+      sku: "SOL-INV-5KW",
+      name: "Hybrid Pure Sine Wave Solar Inverter with 80A MPPT Controller (5kW / 48V)",
+      slug: "hybrid-pure-sine-wave-solar-inverter-5kw",
+      category: "Solar Systems & Accessories",
+      subcategory: "Inverters & Storage",
+      short_description: "Smart multifunctional hybrid power inverter combining MPPT solar charger, pure sine wave inverter, and AC battery charger with LCD status screen.",
+      full_description: "Seamless automatic changeover between solar power, lithium/gel battery backup, and utility grid power. High surge capacity for starting refrigerators, water pumps, and air conditioning units.",
+      image_url: "/images/power.jpg",
+      specs: '{"Rated Power": "5000VA / 5000W", "Battery Voltage": "48V DC", "MPPT Range": "120V - 450V DC", "Max Solar Input": "5000W", "Waveform": "Pure Sine Wave"}',
+      in_stock: true,
+      base_estimate_price: 85000.00,
+      rating: 4.9,
+      reviews_count: 19,
+      featured: false
+    },
+    {
+      id: 19,
+      sku: "SOL-FLD-200W",
+      name: "All-in-One Solar LED Security Floodlight with PIR Motion Sensor (200W IP67)",
+      slug: "solar-led-security-floodlight-200w",
+      category: "Solar Systems & Accessories",
+      subcategory: "Solar Outdoor Lighting",
+      short_description: "Zero-electricity outdoor commercial solar floodlight with integrated high-capacity lithium iron phosphate (LiFePO4) battery and wireless remote.",
+      full_description: "Heavy-duty die-cast aluminum solar luminaire providing ultra-wide beam perimeter security illumination. Dusk-to-dawn automatic intelligent sensor controller keeps perimeter well lit through rainy nights.",
+      image_url: "/images/chandelier section.jpg",
+      specs: '{"Power": "200W High Lumen LED", "Battery": "3.2V 25Ah LiFePO4", "Lighting Time": "12-16 Hours Continuous", "Waterproof Rating": "IP67", "Control": "Auto Dusk-to-Dawn + Infrared Remote"}',
+      in_stock: true,
+      base_estimate_price: 5200.00,
+      rating: 4.8,
+      reviews_count: 47,
+      featured: true
+    },
+    {
+      id: 20,
+      sku: "TOL-CRM-RAT",
+      name: "Heavy-Duty Electrician Ratchet Cable Terminal Crimping Plier Kit (0.5mm² - 10mm²)",
+      slug: "electrician-ratchet-crimping-plier-kit",
+      category: "Contractor Tools & Hardware",
+      subcategory: "Contractor Crimping Tools",
+      short_description: "Precision hardened carbon steel ratchet crimper with self-locking release mechanism and interchangeable terminal crimping dies.",
+      full_description: "Essential tool for electrical contractors terminating copper lugs, cord end ferrules, and insulated connectors. Ergonomic bi-material non-slip handles ensure consistent, high-leverage crimp pressure without hand fatigue.",
+      image_url: "/images/twin cable and others.jpg",
+      specs: '{"Crimping Capacity": "0.5mm² to 10mm² (AWG 22-8)", "Mechanism": "Ergonomic Labor-Saving Ratchet", "Handle": "Non-Slip Dual Component TPR", "Weight": "650g"}',
+      in_stock: true,
+      base_estimate_price: 3800.00,
+      rating: 4.9,
+      reviews_count: 38,
+      featured: false
+    },
+    {
+      id: 21,
+      sku: "TOL-CLW-HAM",
+      name: "Contractor Drop-Forged Steel Claw Hammer (16oz / 450g Anti-Shock Grip)",
+      slug: "contractor-drop-forged-claw-hammer",
+      category: "Contractor Tools & Hardware",
+      subcategory: "Striking Tools",
+      short_description: "Solid one-piece forged steel claw hammer with curved claw for effortless nail extraction and vibration-damping fiberglass ergonomic grip.",
+      full_description: "Forged high-carbon steel head with precision ground face and high-leverage curved claw for pulling wiring clips and nails. Balanced weight distribution minimizes contractor strain during long installation shifts.",
+      image_url: "/images/items section layout.jpg",
+      specs: '{"Head Weight": "16 oz / 450 grams", "Head Material": "Drop-Forged High Carbon Steel", "Shaft": "Anti-Vibration Fiberglass Core", "Claw": "High-Leverage Curved Claw"}',
+      in_stock: true,
+      base_estimate_price: 1850.00,
+      rating: 4.7,
+      reviews_count: 29,
+      featured: false
+    },
+    {
+      id: 22,
+      sku: "TOL-TIE-SET",
+      name: "Industrial UV-Resistant Nylon Cable Ties & Nail Clip Assortment (Pack of 1000)",
+      slug: "uv-resistant-cable-ties-clips-pack-1000",
+      category: "Contractor Tools & Hardware",
+      subcategory: "Cable Management & Clips",
+      short_description: "Weather-resistant tensile nylon self-locking cable ties and round cable nail clips in assorted sizes for neat cable bundling and conduit fixing.",
+      full_description: "Comprehensive contractor pack containing 100mm, 150mm, 200mm, and 300mm black UV-resistant nylon ties along with 4mm, 6mm, 8mm, and 10mm round hardened steel nail clips for clean surface wiring.",
+      image_url: "/images/twin cable and others.jpg",
+      specs: '{"Quantity": "1000 Pieces Assorted", "Sizes Included": "100mm, 150mm, 200mm, 250mm, 300mm", "Material": "UL-Approved Polyamide Nylon 6/6", "Tensile Strength": "Up to 50 lbs (22kg)"}',
+      in_stock: true,
+      base_estimate_price: 1400.00,
+      rating: 4.9,
+      reviews_count: 62,
+      featured: false
     }
   ];
 
@@ -490,13 +660,18 @@ export default function App() {
     setCart([]);
   };
 
-  // Page navigation handler with browser history synchronization
-  const handleNavigate = (sectionId) => {
+  // Page navigation handler with browser history synchronization and optional category selection
+  const handleNavigate = (sectionId, category = null) => {
     setActiveSection(sectionId);
+    if (category) {
+      setSelectedCategory(category);
+    } else if (sectionId === 'products') {
+      setSelectedCategory('All');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
       const url = sectionId === 'home' ? '/' : `/${sectionId}`;
-      window.history.pushState({ section: sectionId }, '', url);
+      window.history.pushState({ section: sectionId, category }, '', url);
     } catch (e) {}
   };
 
@@ -565,6 +740,7 @@ export default function App() {
           setIsTrackQuoteOpen(true);
         }}
         activeSection={activeSection}
+        activeCategory={selectedCategory}
         onNavigate={handleNavigate}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

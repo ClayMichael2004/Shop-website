@@ -66,6 +66,21 @@ export default function Footer({ onNavigate, onOpenTrackQuote, onOpenPrivacyTerm
               </button>
             </li>
             <li>
+              <button onClick={() => onNavigate('products', 'Electrical Fittings')} className="hover:text-black transition-colors font-medium">
+                Electrical Fittings
+              </button>
+            </li>
+            <li>
+              <button onClick={() => onNavigate('products', 'Solar Systems & Accessories')} className="hover:text-black transition-colors font-medium">
+                Solar Systems
+              </button>
+            </li>
+            <li>
+              <button onClick={() => onNavigate('products', 'Contractor Tools & Hardware')} className="hover:text-black transition-colors font-medium">
+                Contractor Tools
+              </button>
+            </li>
+            <li>
               <button onClick={() => onNavigate('contact')} className="hover:text-black transition-colors font-medium">
                 Contact Us
               </button>

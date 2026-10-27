@@ -28,6 +28,10 @@ export default function ProductCatalog({
       'Single Core Cables',
       'Twin & Earth Cables',
       'Chandeliers & Lighting',
+      'Electrical Fittings',
+      'Electronics & Appliances',
+      'Solar Systems & Accessories',
+      'Contractor Tools & Hardware',
       'Switchgear & Meters',
       'Accessories & Sockets'
     ]);
@@ -61,10 +65,28 @@ export default function ProductCatalog({
     }
 
     if (selectedCategory && selectedCategory !== 'All') {
-      list = list.filter(p => 
-        p.category === selectedCategory || 
-        p.subcategory === selectedCategory
-      );
+      const target = selectedCategory.toLowerCase().trim();
+      list = list.filter(p => {
+        const cat = (p.category || '').toLowerCase();
+        const sub = (p.subcategory || '').toLowerCase();
+
+        // Exact match
+        if (cat === target || sub === target) return true;
+
+        // Aliases / Substring matching for grouped categories
+        if (target === 'electrical fittings' && (cat.includes('fitting') || cat.includes('accessories') || cat.includes('socket') || sub.includes('switch') || sub.includes('outlet'))) return true;
+        if (target.includes('tool') || target.includes('hardware')) {
+          return cat.includes('tool') || cat.includes('hardware') || sub.includes('crimping') || sub.includes('hammer') || sub.includes('clip');
+        }
+        if (target.includes('solar')) {
+          return cat.includes('solar') || sub.includes('solar') || sub.includes('photovoltaic');
+        }
+        if (target.includes('electronic') || target.includes('appliance')) {
+          return cat.includes('electron') || cat.includes('appliance') || sub.includes('stabilizer') || sub.includes('regulator') || sub.includes('surge');
+        }
+
+        return cat.includes(target) || target.includes(cat) || sub.includes(target);
+      });
     }
 
     if (searchQuery && searchQuery.trim() !== '') {
