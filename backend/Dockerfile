@@ -5,6 +5,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copies all backend components into the build staging environment
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o server ./cmd/server
 
@@ -21,8 +22,8 @@ COPY --from=builder /app/server .
 # Create data directory with permissions for unprivileged user
 RUN mkdir -p /app/data && chown -R appuser:appgroup /app
 
-# Ensure assets exist for image serving
-COPY assets /assets
+# FIXED: Pulls the assets folder cleanly out of the container cache stage
+COPY --from=builder /app/assets /assets
 
 USER appuser
 
@@ -31,6 +32,6 @@ ENV PORT=8080
 ENV DB_PATH=/app/data/electrical_shop.db
 
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:8080/api/health || exit 1
+  CMD wget -qO- http://127.0.0 || exit 1
 
 CMD ["./server"]
