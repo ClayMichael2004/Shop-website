@@ -22,7 +22,7 @@ COPY --from=builder /app/server .
 RUN mkdir -p /app/data && chown -R appuser:appgroup /app
 
 # Ensure assets exist for image serving
-COPY assets /assets
+COPY --from=builder /app/assets /assets
 
 USER appuser
 
