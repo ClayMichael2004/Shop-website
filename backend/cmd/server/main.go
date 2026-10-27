@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -51,8 +52,11 @@ func main() {
 
 	// Static images handler with directory listing prevention
 	imagesDir := "./assets"
-	if _, err := os.Stat("../assets"); err == nil {
-		imagesDir = "../assets"
+	for _, dir := range []string{"./assets", "../assets", "/assets", "/app/assets"} {
+		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
+			imagesDir = dir
+			break
+		}
 	}
 	fileServer := http.StripPrefix("/images/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Prevent directory browsing / indexing
@@ -192,6 +196,60 @@ func main() {
 	})
 
 	mux.Handle("/api/admin/", adminAuth(adminMux))
+
+	// Frontend SPA & Static Files Serving
+	frontendDir := ""
+	for _, dir := range []string{"./dist", "./frontend/dist", "../frontend/dist", "/app/dist", "/app/frontend/dist"} {
+		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
+			frontendDir = dir
+			break
+		}
+	}
+
+	if frontendDir != "" {
+		log.Printf("Serving frontend application from %s", frontendDir)
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			// Never serve index.html for missing /api/ or /images/ endpoints
+			if strings.HasPrefix(r.URL.Path, "/api/") || strings.HasPrefix(r.URL.Path, "/images/") {
+				http.NotFound(w, r)
+				return
+			}
+
+			cleanPath := filepath.Clean(r.URL.Path)
+			filePath := filepath.Join(frontendDir, cleanPath)
+
+			stat, err := os.Stat(filePath)
+			if err == nil && !stat.IsDir() {
+				// Static assets (like /assets/*.js or /assets/*.css) can be aggressively cached
+				if strings.HasPrefix(cleanPath, "/assets/") {
+					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+				}
+				http.ServeFile(w, r, filePath)
+				return
+			}
+
+			// Single Page Application routing: serve index.html for all other page routes
+			indexPath := filepath.Join(frontendDir, "index.html")
+			if _, err := os.Stat(indexPath); err == nil {
+				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+				http.ServeFile(w, r, indexPath)
+				return
+			}
+
+			http.NotFound(w, r)
+		})
+	} else {
+		log.Println("Frontend build directory not found. Serving default status at root.")
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"shop_name":"VoltCraft Electrical & Lighting","status":"running","frontend":"dist directory not found"}`))
+				return
+			}
+			http.NotFound(w, r)
+		})
+	}
 
 	if cfg.AdminToken == "kadianga-admin-2026" {
 		log.Println("[SECURITY WARNING] Server is using default development ADMIN_TOKEN (kadianga-admin-2026). In production, set a strong random ADMIN_TOKEN in your environment!")

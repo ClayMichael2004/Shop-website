@@ -318,6 +318,8 @@ func (h *APIHandler) saveBase64Image(dataURL string) (string, error) {
 	targetDirs := []string{
 		"./assets",
 		"../assets",
+		"/assets",
+		"/app/assets",
 		"./frontend/public/images",
 		"../frontend/public/images",
 		"./frontend/dist/images",
@@ -487,6 +489,8 @@ func (h *APIHandler) AdminUploadImage(w http.ResponseWriter, r *http.Request) {
 	targetDirs := []string{
 		"./assets",
 		"../assets",
+		"/assets",
+		"/app/assets",
 		"./frontend/public/images",
 		"../frontend/public/images",
 		"./frontend/dist/images",
