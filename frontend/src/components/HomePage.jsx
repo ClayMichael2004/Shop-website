@@ -168,8 +168,8 @@ export default function HomePage({
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-neutral-200 mt-4">
-                    <span className="text-base font-bold text-neutral-900">
-                      KSh {Number(prod.base_estimate_price || 0).toLocaleString()}
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60">
+                      Price on Quote
                     </span>
                     <button
                       onClick={(e) => {

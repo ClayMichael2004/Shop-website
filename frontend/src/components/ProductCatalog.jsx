@@ -297,8 +297,6 @@ export default function ProductCatalog({
               >
                 <option value="default">Default Sorting</option>
                 <option value="rating">Top Rated</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
                 <option value="name">Name: A to Z</option>
               </select>
             </div>
@@ -389,11 +387,11 @@ export default function ProductCatalog({
                   {/* Price & Action Button Row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 sm:pt-3 border-t border-neutral-200 gap-1.5 sm:gap-2">
                     <div>
-                      <span className="text-xs sm:text-lg font-bold text-neutral-900 block leading-tight">
-                        KSh {Number(prod.base_estimate_price || 0).toLocaleString()}
+                      <span className="text-[11px] sm:text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60 inline-block leading-tight">
+                        Price on Quote
                       </span>
-                      <span className="text-[9px] sm:text-[11px] text-neutral-600 font-semibold block">
-                        Wholesale Guide
+                      <span className="text-[9px] sm:text-[10px] text-neutral-500 font-medium block mt-0.5">
+                        Direct Wholesale Rate
                       </span>
                     </div>
 

@@ -196,7 +196,7 @@ export default function CartQuotation({
               <div className="grid grid-cols-12 text-xs font-bold text-neutral-900 pb-3 border-b border-neutral-300 uppercase tracking-wider sticky top-0 bg-white z-10">
                 <div className="col-span-6">Product Details</div>
                 <div className="col-span-3 text-center">Quantity</div>
-                <div className="col-span-2 text-right">Total</div>
+                <div className="col-span-2 text-right">Pricing</div>
                 <div className="col-span-1 text-right"></div>
               </div>
 
@@ -221,9 +221,6 @@ export default function CartQuotation({
                         </h4>
                         <span className="text-[11px] text-neutral-500 font-mono block">
                           SKU: {item.sku || `ITEM-${item.id}`}
-                        </span>
-                        <span className="text-[10px] text-neutral-600 font-semibold block">
-                          Rate: KSh {Number(item.base_estimate_price || 0).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -253,10 +250,10 @@ export default function CartQuotation({
                       </div>
                     </div>
 
-                    {/* Total Price */}
+                    {/* Pricing Status */}
                     <div className="col-span-2 text-right">
-                      <span className="font-bold text-neutral-900 block font-mono text-[11px] sm:text-sm">
-                        KSh {((item.base_estimate_price || 0) * (item.quantity || 1)).toLocaleString()}
+                      <span className="text-[10px] sm:text-xs font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60 inline-block">
+                        To be Quoted
                       </span>
                     </div>
 
@@ -312,42 +309,23 @@ export default function CartQuotation({
                 Order Summary
               </h2>
 
-              {/* Discount voucher input with Apply pill matching inspo */}
-              <form onSubmit={handleApplyVoucher} className="flex items-center gap-2 mb-4">
-                <input
-                  type="text"
-                  placeholder="Discount voucher (e.g. VOLT10)"
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
-                  className="flex-1 px-4 py-2 rounded-full border border-neutral-300 text-xs text-neutral-900 placeholder-neutral-500 focus:outline-none focus:border-black font-medium"
-                />
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-full border border-neutral-300 text-xs font-semibold text-neutral-800 hover:border-black transition-colors"
-                >
-                  Apply
-                </button>
-              </form>
-
-              {/* Summary line items matching inspo */}
+              {/* Summary line items matching quotation workflow */}
               <div className="space-y-3 text-xs text-neutral-700 pb-5 border-b border-neutral-200 font-medium">
                 <div className="flex justify-between">
-                  <span>Sub Total</span>
-                  <span className="font-bold text-neutral-900">KSh {subtotal.toLocaleString()}</span>
+                  <span>Total Quantity</span>
+                  <span className="font-bold text-neutral-900">{cart.reduce((a, b) => a + (b.quantity || 1), 0)} units</span>
                 </div>
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-800 font-bold">
-                    <span>Discount</span>
-                    <span>-KSh {discountAmount.toLocaleString()}</span>
-                  </div>
-                )}
                 <div className="flex justify-between">
-                  <span>Delivery fee</span>
-                  <span className="font-bold text-neutral-900">{deliveryFee > 0 ? `KSh ${deliveryFee.toLocaleString()}` : 'Free'}</span>
+                  <span>Product Lines</span>
+                  <span className="font-bold text-neutral-900">{cart.length} item{cart.length === 1 ? '' : 's'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Pricing Method</span>
+                  <span className="font-semibold text-amber-800">Quoted by Sales Team upon Request</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-neutral-900 pt-3 border-t border-neutral-200">
-                  <span>Estimated Total</span>
-                  <span className="font-bold text-[#e67e22]">KSh {calculatedTotal.toLocaleString()}</span>
+                  <span>Quotation Fee</span>
+                  <span className="font-bold text-emerald-700">FREE & NO OBLIGATION</span>
                 </div>
               </div>
 

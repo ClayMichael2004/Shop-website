@@ -159,13 +159,13 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, shop
 
               {/* Price / Quote indicator */}
               <div className="bg-[#faf9f6] p-3.5 rounded-2xl border border-neutral-200/80 mb-5">
-                <span className="text-xs text-neutral-800 font-bold block">Pricing Structure:</span>
-                <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
-                  <span className="text-2xl font-bold text-neutral-900">
-                    {product.base_estimate_price > 0 ? `KSh ${Number(product.base_estimate_price).toLocaleString()}` : 'Wholesale Quotation'}
+                <span className="text-xs text-neutral-500 font-bold block uppercase tracking-wider">Pricing:</span>
+                <div className="flex flex-wrap items-baseline gap-2 mt-1">
+                  <span className="text-xl sm:text-2xl font-bold text-[#e67e22]">
+                    Quotation on Request
                   </span>
-                  <span className="text-xs text-neutral-700 font-medium">
-                    {product.base_estimate_price > 0 ? '(Estimated guide price - final total discounted upon quote)' : '(No upfront payment needed)'}
+                  <span className="text-xs text-neutral-600 font-medium">
+                    (Official wholesale rates & contractor discounts quoted by sales team)
                   </span>
                 </div>
               </div>
