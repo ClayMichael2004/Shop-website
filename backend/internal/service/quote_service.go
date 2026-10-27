@@ -124,33 +124,27 @@ func (s *QuoteService) CreateQuote(input *models.CreateQuoteInput) (*CreateQuote
 			quote_number, customer_name, customer_email, customer_phone, customer_location,
 			notes, preferred_contact, status, client_uuid, created_at, updated_at
 		) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+		RETURNING id
 	`
-	res, err := tx.Exec(query,
+	var quoteID int64
+	err = tx.QueryRow(query,
 		quoteNumber, input.CustomerName, input.CustomerEmail, input.CustomerPhone,
 		input.CustomerLocation, input.Notes, preferred, input.ClientUUID,
-	)
+	).Scan(&quoteID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert quote request: %w", err)
-	}
-
-	quoteID, err := res.LastInsertId()
-	if err != nil {
-		return nil, err
 	}
 
 	var quoteItems []models.QuoteItem
 	var subtotal float64
 
-	itemStmt, err := tx.Prepare(`
+	itemQuery := `
 		INSERT INTO quote_items (
 			quote_id, product_id, product_name, product_sku, product_image,
 			quantity, quoted_unit_price, quoted_total_price, specs_notes
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`)
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare item stmt: %w", err)
-	}
-	defer itemStmt.Close()
+		RETURNING id
+	`
 
 	for _, it := range input.Items {
 		prod, err := s.prodSvc.GetProductByID(it.ProductID)
@@ -180,14 +174,15 @@ func (s *QuoteService) CreateQuote(input *models.CreateQuoteInput) (*CreateQuote
 		total := unitPrice * float64(qty)
 		subtotal += total
 
-		itemRes, err := itemStmt.Exec(
+		var itemID int64
+		err = tx.QueryRow(
+			itemQuery,
 			quoteID, it.ProductID, name, sku, image,
 			qty, unitPrice, total, specsNote,
-		)
+		).Scan(&itemID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to insert quote item: %w", err)
 		}
-		itemID, _ := itemRes.LastInsertId()
 
 		quoteItems = append(quoteItems, models.QuoteItem{
 			ID:           itemID,
@@ -587,15 +582,12 @@ func (s *QuoteService) CreateContactInquiry(input *models.ContactInquiryInput) (
 			subtotal, discount, delivery_fee, grand_total,
 			admin_notes, created_at, updated_at
 		) VALUES (?, ?, ?, ?, ?, ?, 'both', 'pending', 0.0, 0.0, 0.0, 0.0, 'Submitted via Contact Us page', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+		RETURNING id
 	`
-	res, err := tx.Exec(insertQuery, inquiryNum, fullName, email, phone, location, notes)
+	var quoteID int64
+	err = tx.QueryRow(insertQuery, inquiryNum, fullName, email, phone, location, notes).Scan(&quoteID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert contact inquiry: %w", err)
-	}
-
-	quoteID, err := res.LastInsertId()
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve inquiry id: %w", err)
 	}
 
 	// Insert descriptive quote item so items table has reference

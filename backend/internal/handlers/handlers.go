@@ -2,13 +2,11 @@ package handlers
 
 import (
 	cryptorand "crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -24,14 +22,16 @@ type APIHandler struct {
 	prodSvc  *service.ProductService
 	quoteSvc *service.QuoteService
 	whatsApp *service.WhatsAppService
+	mediaSvc *service.MediaService
 }
 
-func NewAPIHandler(cfg *config.Config, prodSvc *service.ProductService, quoteSvc *service.QuoteService, whatsApp *service.WhatsAppService) *APIHandler {
+func NewAPIHandler(cfg *config.Config, prodSvc *service.ProductService, quoteSvc *service.QuoteService, whatsApp *service.WhatsAppService, mediaSvc *service.MediaService) *APIHandler {
 	return &APIHandler{
 		cfg:      cfg,
 		prodSvc:  prodSvc,
 		quoteSvc: quoteSvc,
 		whatsApp: whatsApp,
+		mediaSvc: mediaSvc,
 	}
 }
 
@@ -289,61 +289,12 @@ func (h *APIHandler) AdminSendQuoteEmail(w http.ResponseWriter, r *http.Request)
 	})
 }
 
-// Helper: convert data:image base64 string to a stored static file
+// Helper: convert data:image base64 string to a stored static file or Cloudinary URL
 func (h *APIHandler) saveBase64Image(dataURL string) (string, error) {
-	parts := strings.SplitN(dataURL, ",", 2)
-	if len(parts) != 2 {
-		return "", fmt.Errorf("invalid base64 image data")
+	if h.mediaSvc != nil {
+		return h.mediaSvc.UploadBase64(dataURL)
 	}
-
-	header := parts[0]
-	ext := ".jpg"
-	if strings.Contains(header, "png") {
-		ext = ".png"
-	} else if strings.Contains(header, "webp") {
-		ext = ".webp"
-	} else if strings.Contains(header, "gif") {
-		ext = ".gif"
-	}
-
-	data, err := base64.StdEncoding.DecodeString(parts[1])
-	if err != nil {
-		return "", fmt.Errorf("failed to decode base64 image: %w", err)
-	}
-
-	randomHex := make([]byte, 4)
-	cryptorand.Read(randomHex)
-	newFilename := fmt.Sprintf("prod_%d_%x%s", time.Now().Unix(), randomHex, ext)
-
-	targetDirs := []string{
-		"./assets",
-		"../assets",
-		"/assets",
-		"/app/assets",
-		"./frontend/public/images",
-		"../frontend/public/images",
-		"./frontend/dist/images",
-		"../frontend/dist/images",
-	}
-	saved := false
-
-	for _, dir := range targetDirs {
-		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
-			dstPath := filepath.Join(dir, newFilename)
-			if err := os.WriteFile(dstPath, data, 0644); err == nil {
-				saved = true
-			}
-		}
-	}
-
-	if !saved {
-		_ = os.MkdirAll("./assets", 0755)
-		if err := os.WriteFile(filepath.Join("./assets", newFilename), data, 0644); err != nil {
-			return "", err
-		}
-	}
-
-	return "/images/" + newFilename, nil
+	return "/images/items section layout.jpg", nil
 }
 
 // Admin: Create product
@@ -485,45 +436,18 @@ func (h *APIHandler) AdminUploadImage(w http.ResponseWriter, r *http.Request) {
 	cryptorand.Read(randomHex)
 	newFilename := fmt.Sprintf("prod_%d_%x%s", time.Now().Unix(), randomHex, ext)
 
-	// Save to assets and public images directories
-	targetDirs := []string{
-		"./assets",
-		"../assets",
-		"/assets",
-		"/app/assets",
-		"./frontend/public/images",
-		"../frontend/public/images",
-		"./frontend/dist/images",
-		"../frontend/dist/images",
-	}
-	saved := false
-
-	for _, dir := range targetDirs {
-		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
-			dstPath := filepath.Join(dir, newFilename)
-			dstFile, err := os.Create(dstPath)
-			if err == nil {
-				file.Seek(0, io.SeekStart)
-				io.Copy(dstFile, file)
-				dstFile.Close()
-				saved = true
-			}
-		}
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to read image stream")
+		return
 	}
 
-	if !saved {
-		_ = os.MkdirAll("./assets", 0755)
-		dstFile, err := os.Create(filepath.Join("./assets", newFilename))
-		if err != nil {
-			respondError(w, http.StatusInternalServerError, "Failed to write image file")
-			return
-		}
-		file.Seek(0, io.SeekStart)
-		io.Copy(dstFile, file)
-		dstFile.Close()
+	imageURL, err := h.mediaSvc.UploadBytes(fileBytes, newFilename, contentType)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to upload image: "+err.Error())
+		return
 	}
 
-	imageURL := "/images/" + newFilename
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"url":      imageURL,
 		"filename": newFilename,

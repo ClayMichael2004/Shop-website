@@ -23,13 +23,12 @@ func main() {
 	cfg := config.Load()
 	log.Printf("Starting %s on port %s...", cfg.ShopName, cfg.Port)
 
-	// Initialize Database (SQLite with WAL mode, foreign keys, connection pool, seed data)
-	db, err := database.InitDB(cfg.DBPath)
+	// Initialize Database (Cloud PostgreSQL if DATABASE_URL is set, otherwise SQLite WAL)
+	db, err := database.InitDB(cfg.DatabaseURL, cfg.DBPath)
 	if err != nil {
 		log.Fatalf("Database initialization failed: %v", err)
 	}
 	defer db.Close()
-	log.Printf("Database initialized at %s with WAL mode enabled.", cfg.DBPath)
 
 	// Initialize Cache (In-memory thread-safe with TTL & background janitor)
 	memCache := cache.NewMemoryCache()
@@ -39,9 +38,10 @@ func main() {
 	emailService := service.NewEmailService(cfg)
 	whatsAppService := service.NewWhatsAppService(cfg)
 	quoteService := service.NewQuoteService(db, emailService, whatsAppService, prodService)
+	mediaService := service.NewMediaService(cfg)
 
 	// Initialize API Handler
-	handler := handlers.NewAPIHandler(cfg, prodService, quoteService, whatsAppService)
+	handler := handlers.NewAPIHandler(cfg, prodService, quoteService, whatsAppService, mediaService)
 
 	// Rate Limiters
 	globalLimiter := middleware.NewIPRateLimiter(180, 40) // 180 req/min, burst 40

@@ -3,19 +3,145 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
+	_ "github.com/lib/pq"
 	_ "modernc.org/sqlite"
 )
 
 type DB struct {
 	*sql.DB
+	Dialect string // "postgres" or "sqlite"
 }
 
-func InitDB(dbPath string) (*DB, error) {
-	// Ensure directory exists
+type Tx struct {
+	*sql.Tx
+	Dialect string
+}
+
+func (db *DB) Rebind(query string) string {
+	if db.Dialect != "postgres" {
+		return query
+	}
+	return rebindPostgres(query)
+}
+
+func (tx *Tx) Rebind(query string) string {
+	if tx.Dialect != "postgres" {
+		return query
+	}
+	return rebindPostgres(query)
+}
+
+func rebindPostgres(query string) string {
+	var b strings.Builder
+	b.Grow(len(query) + 16)
+	paramIndex := 1
+	inSingleQuote := false
+
+	for i := 0; i < len(query); i++ {
+		c := query[i]
+		if c == '\'' {
+			inSingleQuote = !inSingleQuote
+			b.WriteByte(c)
+			continue
+		}
+
+		if c == '?' && !inSingleQuote {
+			b.WriteByte('$')
+			b.WriteString(strconv.Itoa(paramIndex))
+			paramIndex++
+		} else {
+			b.WriteByte(c)
+		}
+	}
+
+	result := b.String()
+	result = strings.ReplaceAll(result, " LIKE ", " ILIKE ")
+	return result
+}
+
+func (db *DB) Exec(query string, args ...any) (sql.Result, error) {
+	return db.DB.Exec(db.Rebind(query), args...)
+}
+
+func (db *DB) Query(query string, args ...any) (*sql.Rows, error) {
+	return db.DB.Query(db.Rebind(query), args...)
+}
+
+func (db *DB) QueryRow(query string, args ...any) *sql.Row {
+	return db.DB.QueryRow(db.Rebind(query), args...)
+}
+
+func (db *DB) Prepare(query string) (*sql.Stmt, error) {
+	return db.DB.Prepare(db.Rebind(query))
+}
+
+func (db *DB) Begin() (*Tx, error) {
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return nil, err
+	}
+	return &Tx{Tx: tx, Dialect: db.Dialect}, nil
+}
+
+func (tx *Tx) Exec(query string, args ...any) (sql.Result, error) {
+	return tx.Tx.Exec(tx.Rebind(query), args...)
+}
+
+func (tx *Tx) Query(query string, args ...any) (*sql.Rows, error) {
+	return tx.Tx.Query(tx.Rebind(query), args...)
+}
+
+func (tx *Tx) QueryRow(query string, args ...any) *sql.Row {
+	return tx.Tx.QueryRow(tx.Rebind(query), args...)
+}
+
+func (tx *Tx) Prepare(query string) (*sql.Stmt, error) {
+	return tx.Tx.Prepare(tx.Rebind(query))
+}
+
+func InitDB(databaseURL, dbPath string) (*DB, error) {
+	if strings.HasPrefix(databaseURL, "postgres://") || strings.HasPrefix(databaseURL, "postgresql://") {
+		return initPostgres(databaseURL)
+	}
+	return initSQLite(dbPath)
+}
+
+func initPostgres(connStr string) (*DB, error) {
+	log.Println("Connecting to Cloud PostgreSQL database...")
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open postgres db: %w", err)
+	}
+
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(10)
+	db.SetConnMaxLifetime(time.Hour)
+
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping postgres db: %w", err)
+	}
+	log.Println("Successfully connected to Cloud PostgreSQL database.")
+
+	instance := &DB{DB: db, Dialect: "postgres"}
+	if err := instance.migrate(); err != nil {
+		return nil, fmt.Errorf("failed to run postgres migrations: %w", err)
+	}
+
+	if err := instance.seedProductsIfEmpty(); err != nil {
+		return nil, fmt.Errorf("failed to seed initial products in postgres: %w", err)
+	}
+
+	return instance, nil
+}
+
+func initSQLite(dbPath string) (*DB, error) {
 	dir := filepath.Dir(dbPath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create db directory: %w", err)
@@ -27,101 +153,175 @@ func InitDB(dbPath string) (*DB, error) {
 		return nil, fmt.Errorf("failed to open sqlite db: %w", err)
 	}
 
-	// Optimize connection pool for concurrency
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(10)
 	db.SetConnMaxLifetime(time.Hour)
 
 	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to ping db: %w", err)
+		return nil, fmt.Errorf("failed to ping sqlite db: %w", err)
 	}
+	log.Printf("Connected to local SQLite database at %s.", dbPath)
 
-	instance := &DB{db}
+	instance := &DB{DB: db, Dialect: "sqlite"}
 	if err := instance.migrate(); err != nil {
-		return nil, fmt.Errorf("failed to run migrations: %w", err)
+		return nil, fmt.Errorf("failed to run sqlite migrations: %w", err)
 	}
 
 	if err := instance.seedProductsIfEmpty(); err != nil {
-		return nil, fmt.Errorf("failed to seed initial products: %w", err)
+		return nil, fmt.Errorf("failed to seed initial products in sqlite: %w", err)
 	}
 
 	return instance, nil
 }
 
 func (db *DB) migrate() error {
-	schema := `
-	CREATE TABLE IF NOT EXISTS products (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		sku TEXT NOT NULL UNIQUE,
-		name TEXT NOT NULL,
-		slug TEXT NOT NULL UNIQUE,
-		category TEXT NOT NULL,
-		subcategory TEXT NOT NULL,
-		short_description TEXT NOT NULL,
-		full_description TEXT NOT NULL,
-		image_url TEXT NOT NULL,
-		specs TEXT NOT NULL,
-		in_stock BOOLEAN NOT NULL DEFAULT 1,
-		base_estimate_price REAL NOT NULL DEFAULT 0.0,
-		rating REAL NOT NULL DEFAULT 4.8,
-		reviews_count INTEGER NOT NULL DEFAULT 12,
-		featured BOOLEAN NOT NULL DEFAULT 0,
-		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-	);
+	var schema string
+	if db.Dialect == "postgres" {
+		schema = `
+		CREATE TABLE IF NOT EXISTS products (
+			id SERIAL PRIMARY KEY,
+			sku TEXT NOT NULL UNIQUE,
+			name TEXT NOT NULL,
+			slug TEXT NOT NULL UNIQUE,
+			category TEXT NOT NULL,
+			subcategory TEXT NOT NULL,
+			short_description TEXT NOT NULL,
+			full_description TEXT NOT NULL,
+			image_url TEXT NOT NULL,
+			specs TEXT NOT NULL,
+			in_stock BOOLEAN NOT NULL DEFAULT TRUE,
+			base_estimate_price DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+			rating DOUBLE PRECISION NOT NULL DEFAULT 4.8,
+			reviews_count INTEGER NOT NULL DEFAULT 12,
+			featured BOOLEAN NOT NULL DEFAULT FALSE,
+			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
 
-	CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-	CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
-	CREATE INDEX IF NOT EXISTS idx_products_instock ON products(in_stock);
-	CREATE INDEX IF NOT EXISTS idx_products_featured ON products(featured);
+		CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+		CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
+		CREATE INDEX IF NOT EXISTS idx_products_instock ON products(in_stock);
+		CREATE INDEX IF NOT EXISTS idx_products_featured ON products(featured);
 
-	CREATE TABLE IF NOT EXISTS quote_requests (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		quote_number TEXT NOT NULL UNIQUE,
-		customer_name TEXT NOT NULL,
-		customer_email TEXT NOT NULL,
-		customer_phone TEXT NOT NULL,
-		customer_location TEXT NOT NULL,
-		notes TEXT,
-		preferred_contact TEXT NOT NULL DEFAULT 'both',
-		status TEXT NOT NULL DEFAULT 'pending',
-		subtotal REAL NOT NULL DEFAULT 0.0,
-		discount REAL NOT NULL DEFAULT 0.0,
-		delivery_fee REAL NOT NULL DEFAULT 0.0,
-		grand_total REAL NOT NULL DEFAULT 0.0,
-		admin_notes TEXT,
-		client_uuid TEXT,
-		whatsapp_sent BOOLEAN NOT NULL DEFAULT 0,
-		email_sent BOOLEAN NOT NULL DEFAULT 0,
-		quoted_at DATETIME,
-		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-	);
+		CREATE TABLE IF NOT EXISTS quote_requests (
+			id SERIAL PRIMARY KEY,
+			quote_number TEXT NOT NULL UNIQUE,
+			customer_name TEXT NOT NULL,
+			customer_email TEXT NOT NULL,
+			customer_phone TEXT NOT NULL,
+			customer_location TEXT NOT NULL,
+			notes TEXT,
+			preferred_contact TEXT NOT NULL DEFAULT 'both',
+			status TEXT NOT NULL DEFAULT 'pending',
+			subtotal DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+			discount DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+			delivery_fee DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+			grand_total DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+			admin_notes TEXT,
+			client_uuid TEXT,
+			whatsapp_sent BOOLEAN NOT NULL DEFAULT FALSE,
+			email_sent BOOLEAN NOT NULL DEFAULT FALSE,
+			quoted_at TIMESTAMP WITH TIME ZONE,
+			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
 
-	CREATE INDEX IF NOT EXISTS idx_quote_requests_status ON quote_requests(status);
-	CREATE INDEX IF NOT EXISTS idx_quote_requests_email ON quote_requests(customer_email);
-	CREATE INDEX IF NOT EXISTS idx_quote_requests_phone ON quote_requests(customer_phone);
-	CREATE INDEX IF NOT EXISTS idx_quote_requests_created_at ON quote_requests(created_at DESC);
-	CREATE INDEX IF NOT EXISTS idx_quote_requests_client_uuid ON quote_requests(client_uuid);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_status ON quote_requests(status);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_email ON quote_requests(customer_email);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_phone ON quote_requests(customer_phone);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_created_at ON quote_requests(created_at DESC);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_client_uuid ON quote_requests(client_uuid);
 
-	CREATE TABLE IF NOT EXISTS quote_items (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		quote_id INTEGER NOT NULL,
-		product_id INTEGER NOT NULL,
-		product_name TEXT NOT NULL,
-		product_sku TEXT NOT NULL,
-		product_image TEXT NOT NULL,
-		quantity INTEGER NOT NULL DEFAULT 1,
-		quoted_unit_price REAL NOT NULL DEFAULT 0.0,
-		quoted_total_price REAL NOT NULL DEFAULT 0.0,
-		specs_notes TEXT,
-		FOREIGN KEY (quote_id) REFERENCES quote_requests(id) ON DELETE CASCADE
-	);
+		CREATE TABLE IF NOT EXISTS quote_items (
+			id SERIAL PRIMARY KEY,
+			quote_id INTEGER NOT NULL REFERENCES quote_requests(id) ON DELETE CASCADE,
+			product_id INTEGER NOT NULL,
+			product_name TEXT NOT NULL,
+			product_sku TEXT NOT NULL,
+			product_image TEXT NOT NULL,
+			quantity INTEGER NOT NULL DEFAULT 1,
+			quoted_unit_price DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+			quoted_total_price DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+			specs_notes TEXT
+		);
 
-	CREATE INDEX IF NOT EXISTS idx_quote_items_quote_id ON quote_items(quote_id);
-	`
+		CREATE INDEX IF NOT EXISTS idx_quote_items_quote_id ON quote_items(quote_id);
+		`
+	} else {
+		schema = `
+		CREATE TABLE IF NOT EXISTS products (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			sku TEXT NOT NULL UNIQUE,
+			name TEXT NOT NULL,
+			slug TEXT NOT NULL UNIQUE,
+			category TEXT NOT NULL,
+			subcategory TEXT NOT NULL,
+			short_description TEXT NOT NULL,
+			full_description TEXT NOT NULL,
+			image_url TEXT NOT NULL,
+			specs TEXT NOT NULL,
+			in_stock BOOLEAN NOT NULL DEFAULT 1,
+			base_estimate_price REAL NOT NULL DEFAULT 0.0,
+			rating REAL NOT NULL DEFAULT 4.8,
+			reviews_count INTEGER NOT NULL DEFAULT 12,
+			featured BOOLEAN NOT NULL DEFAULT 0,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
 
-	_, err := db.Exec(schema)
+		CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+		CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
+		CREATE INDEX IF NOT EXISTS idx_products_instock ON products(in_stock);
+		CREATE INDEX IF NOT EXISTS idx_products_featured ON products(featured);
+
+		CREATE TABLE IF NOT EXISTS quote_requests (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			quote_number TEXT NOT NULL UNIQUE,
+			customer_name TEXT NOT NULL,
+			customer_email TEXT NOT NULL,
+			customer_phone TEXT NOT NULL,
+			customer_location TEXT NOT NULL,
+			notes TEXT,
+			preferred_contact TEXT NOT NULL DEFAULT 'both',
+			status TEXT NOT NULL DEFAULT 'pending',
+			subtotal REAL NOT NULL DEFAULT 0.0,
+			discount REAL NOT NULL DEFAULT 0.0,
+			delivery_fee REAL NOT NULL DEFAULT 0.0,
+			grand_total REAL NOT NULL DEFAULT 0.0,
+			admin_notes TEXT,
+			client_uuid TEXT,
+			whatsapp_sent BOOLEAN NOT NULL DEFAULT 0,
+			email_sent BOOLEAN NOT NULL DEFAULT 0,
+			quoted_at DATETIME,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_status ON quote_requests(status);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_email ON quote_requests(customer_email);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_phone ON quote_requests(customer_phone);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_created_at ON quote_requests(created_at DESC);
+		CREATE INDEX IF NOT EXISTS idx_quote_requests_client_uuid ON quote_requests(client_uuid);
+
+		CREATE TABLE IF NOT EXISTS quote_items (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			quote_id INTEGER NOT NULL,
+			product_id INTEGER NOT NULL,
+			product_name TEXT NOT NULL,
+			product_sku TEXT NOT NULL,
+			product_image TEXT NOT NULL,
+			quantity INTEGER NOT NULL DEFAULT 1,
+			quoted_unit_price REAL NOT NULL DEFAULT 0.0,
+			quoted_total_price REAL NOT NULL DEFAULT 0.0,
+			specs_notes TEXT,
+			FOREIGN KEY (quote_id) REFERENCES quote_requests(id) ON DELETE CASCADE
+		);
+
+		CREATE INDEX IF NOT EXISTS idx_quote_items_quote_id ON quote_items(quote_id);
+		`
+	}
+
+	_, err := db.DB.Exec(schema)
 	return err
 }
 
@@ -277,7 +477,7 @@ func (db *DB) seedProductsIfEmpty() error {
 	for _, s := range seeds {
 		_, err := stmt.Exec(
 			s.sku, s.name, s.slug, s.category, s.subcategory, s.shortDesc, s.fullDesc,
-			s.image, s.specs, 1, s.price, s.rating, s.reviews, s.featured,
+			s.image, s.specs, true, s.price, s.rating, s.reviews, s.featured,
 		)
 		if err != nil {
 			return err

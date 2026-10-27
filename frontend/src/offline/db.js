@@ -44,6 +44,7 @@ export async function cacheProductsOffline(products) {
     }
     const tx = db.transaction('products', 'readwrite');
     const store = tx.objectStore('products');
+    store.clear();
     for (const p of products) {
       store.put(p);
     }

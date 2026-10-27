@@ -18,8 +18,12 @@ type Config struct {
 	SMTPPort     string
 	SMTPUser     string
 	SMTPPass     string
-	SMTPFrom     string
-	CORSAllow    string
+	SMTPFrom            string
+	CORSAllow           string
+	DatabaseURL         string
+	CloudinaryCloudName string
+	CloudinaryAPIKey    string
+	CloudinaryAPISecret string
 }
 
 func loadDotEnv() {
@@ -65,21 +69,45 @@ func Load() *Config {
 	shopAddress := getEnv("SHOP_ADDRESS", "Plot 42, Industrial Area, Commercial Road")
 	adminToken := getEnv("ADMIN_TOKEN", "kadianga-admin-2026")
 	corsAllow := getEnv("CORS_ALLOW", "*")
+	databaseURL := getEnv("DATABASE_URL", "")
+
+	cloudName := getEnv("CLOUDINARY_CLOUD_NAME", "")
+	apiKey := getEnv("CLOUDINARY_API_KEY", "")
+	apiSecret := getEnv("CLOUDINARY_API_SECRET", "")
+
+	// Also support CLOUDINARY_URL format: cloudinary://api_key:api_secret@cloud_name
+	cloudinaryURL := getEnv("CLOUDINARY_URL", "")
+	if cloudinaryURL != "" && (cloudName == "" || apiKey == "" || apiSecret == "") {
+		trimmed := strings.TrimPrefix(cloudinaryURL, "cloudinary://")
+		parts := strings.Split(trimmed, "@")
+		if len(parts) == 2 {
+			cloudName = parts[1]
+			authParts := strings.Split(parts[0], ":")
+			if len(authParts) == 2 {
+				apiKey = authParts[0]
+				apiSecret = authParts[1]
+			}
+		}
+	}
 
 	return &Config{
-		Port:         port,
-		DBPath:       dbPath,
-		ShopName:     shopName,
-		ShopWhatsApp: shopWhatsApp,
-		ShopEmail:    shopEmail,
-		ShopAddress:  shopAddress,
-		AdminToken:   adminToken,
-		SMTPHost:     getEnv("SMTP_HOST", ""),
-		SMTPPort:     getEnv("SMTP_PORT", "587"),
-		SMTPUser:     getEnv("SMTP_USER", ""),
-		SMTPPass:     getEnv("SMTP_PASS", ""),
-		SMTPFrom:     getEnv("SMTP_FROM", shopEmail),
-		CORSAllow:    corsAllow,
+		Port:                port,
+		DBPath:              dbPath,
+		ShopName:            shopName,
+		ShopWhatsApp:        shopWhatsApp,
+		ShopEmail:           shopEmail,
+		ShopAddress:         shopAddress,
+		AdminToken:          adminToken,
+		SMTPHost:            getEnv("SMTP_HOST", ""),
+		SMTPPort:            getEnv("SMTP_PORT", "587"),
+		SMTPUser:            getEnv("SMTP_USER", ""),
+		SMTPPass:            getEnv("SMTP_PASS", ""),
+		SMTPFrom:            getEnv("SMTP_FROM", shopEmail),
+		CORSAllow:           corsAllow,
+		DatabaseURL:         databaseURL,
+		CloudinaryCloudName: cloudName,
+		CloudinaryAPIKey:    apiKey,
+		CloudinaryAPISecret: apiSecret,
 	}
 }
 

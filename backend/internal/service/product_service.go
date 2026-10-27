@@ -178,15 +178,17 @@ func (s *ProductService) CreateProduct(p *models.Product) (int64, error) {
 			image_url, specs, in_stock, base_estimate_price, rating, reviews_count, featured,
 			created_at, updated_at
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+		RETURNING id
 	`
-	res, err := s.db.Exec(query,
+	var id int64
+	err := s.db.QueryRow(query,
 		p.SKU, p.Name, p.Slug, p.Category, p.Subcategory, p.ShortDesc, p.FullDesc,
 		p.ImageURL, p.Specs, p.InStock, p.BaseEstimatePrice, p.Rating, p.ReviewsCount, p.Featured,
-	)
+	).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
-	return res.LastInsertId()
+	return id, nil
 }
 
 func (s *ProductService) UpdateProduct(id int64, p *models.Product) error {
