@@ -38,26 +38,16 @@ export default function Navbar({
     setMobileMenuOpen(false);
   };
 
-  const handleSearchKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      if (onSearchSubmit) {
-        onSearchSubmit();
-      } else {
-        onNavigate('products');
-      }
-    }
-  };
-
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-neutral-300 text-neutral-900 shadow-sm transition-all">
-      <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 h-20 flex items-center justify-between gap-2 sm:gap-4 lg:gap-4 xl:gap-6">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 h-20 flex items-center justify-between gap-4 lg:gap-6 xl:gap-8">
         
         {/* Left: Brand Logo pinned to the far left corner */}
         <div 
           onClick={() => handleNavClick('home')} 
           onDoubleClick={() => onOpenStaffLogin && onOpenStaffLogin()}
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none shrink-0"
-          title="Kadianga Electricals"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none shrink-0"
+          title="Kadianga Electricals • Double-click for staff access"
         >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#18181b] group-hover:bg-[#e67e22] flex items-center justify-center text-white font-bold text-xs sm:text-sm tracking-wider transition-colors shadow-sm shrink-0">
             KE
@@ -72,8 +62,8 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Center: High-Contrast Uniform Navigation Links evenly arranged across remaining space */}
-        <nav className="hidden lg:flex items-center justify-center xl:justify-evenly flex-1 gap-1 xl:gap-2.5 2xl:gap-4 min-w-0 px-1 xl:px-3">
+        {/* Center: Well-Spaced, Highly Responsive Navigation Links filling the space cleanly */}
+        <nav className="hidden lg:flex items-center justify-center xl:justify-evenly flex-1 gap-1 xl:gap-2.5 2xl:gap-5 min-w-0 px-2 lg:px-4 xl:px-6">
           {navLinks.map((link) => {
             const isActive = 
               link.category 
@@ -86,9 +76,9 @@ export default function Navbar({
               <button
                 key={link.id}
                 onClick={() => handleNavClick(link)}
-                className={`text-[11px] xl:text-xs uppercase font-bold tracking-wider transition-colors py-1.5 px-1.5 xl:px-2 rounded-md whitespace-nowrap relative ${
+                className={`text-[11px] xl:text-xs 2xl:text-[13px] uppercase font-bold tracking-wider transition-all py-2 px-2.5 xl:px-3 2xl:px-4 rounded-xl whitespace-nowrap relative select-none ${
                   isActive
-                    ? 'text-[#18181b] font-black after:absolute after:-bottom-1 after:left-1.5 after:right-1.5 after:h-[2px] after:bg-[#18181b]'
+                    ? 'text-[#18181b] font-black bg-neutral-100/90 shadow-xs after:absolute after:-bottom-0.5 after:left-3 after:right-3 after:h-[2.5px] after:bg-[#e67e22] after:rounded-full'
                     : 'text-neutral-700 hover:text-black hover:bg-neutral-100/70 font-bold'
                 }`}
                 title={link.label}
@@ -100,36 +90,13 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Search Bar */}
-        <div className="relative w-32 xl:w-48 2xl:w-60 hidden md:block shrink-0">
-          <Search className="w-3.5 h-3.5 text-neutral-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none font-bold" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            placeholder="Search products..."
-            className="w-full bg-neutral-100 hover:bg-neutral-100/90 focus:bg-white text-xs pl-8 pr-7 py-2 rounded-full border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900 placeholder-neutral-500 font-medium transition-all shadow-inner"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange && onSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-neutral-500 hover:text-neutral-900"
-              aria-label="Clear search"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-
-        {/* Right: Actions (Track Quote + Quotation Cart + Hamburger) */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        {/* Right: Actions (Track Quote + Quotation Cart + Mobile Hamburger) */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
           {/* Track Quote Button */}
           <button
             onClick={onOpenTrackQuote}
-            className="flex items-center gap-1.5 bg-white hover:bg-neutral-100 active:scale-95 transition-all text-neutral-900 px-2.5 sm:px-3 py-2 rounded-full border border-neutral-300 text-xs font-bold shadow-sm"
+            className="flex items-center gap-1.5 bg-white hover:bg-neutral-100 active:scale-95 transition-all text-neutral-900 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-full border border-neutral-300 text-xs font-bold shadow-sm"
             title="Track status of a submitted quotation"
           >
             <FileText className="w-3.5 h-3.5 text-neutral-800" />
@@ -140,7 +107,7 @@ export default function Navbar({
           <button
             onClick={onOpenCart}
             aria-label="View Quotation Cart"
-            className="flex items-center gap-1.5 sm:gap-2 bg-[#18181b] hover:bg-[#e67e22] active:scale-95 transition-all text-white px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 bg-[#18181b] hover:bg-[#e67e22] active:scale-95 transition-all text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs font-bold shadow-sm"
           >
             <ShoppingBag className="w-3.5 h-3.5 text-white" />
             <span className="hidden sm:inline">Quotation Cart</span>
@@ -163,11 +130,11 @@ export default function Navbar({
 
       </div>
 
-      {/* Mobile Search Bar & Menu Dropdown */}
+      {/* Mobile Menu Dropdown (Drawer) */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-neutral-200 px-5 py-4 space-y-2.5 shadow-xl max-h-[80vh] overflow-y-auto">
+        <div className="lg:hidden bg-white border-t border-neutral-200 px-5 py-4 space-y-2.5 shadow-xl max-h-[85vh] overflow-y-auto">
           {/* Mobile Search Input */}
-          <div className="relative w-full mb-3 md:hidden">
+          <div className="relative w-full mb-3">
             <Search className="w-4 h-4 text-neutral-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
@@ -175,7 +142,11 @@ export default function Navbar({
               onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleNavClick('products');
+                  if (onSearchSubmit) {
+                    onSearchSubmit();
+                  } else {
+                    handleNavClick('products');
+                  }
                 }
               }}
               placeholder="Search catalog products..."
@@ -199,7 +170,7 @@ export default function Navbar({
               <button
                 key={link.id}
                 onClick={() => handleNavClick(link)}
-                className={`flex items-center justify-between w-full text-left px-3 py-2 rounded-xl text-xs uppercase font-bold tracking-wider transition-colors ${
+                className={`flex items-center justify-between w-full text-left px-3 py-2.5 rounded-xl text-xs uppercase font-bold tracking-wider transition-colors ${
                   isActive
                     ? 'bg-neutral-900 text-white font-black'
                     : 'text-neutral-700 hover:bg-neutral-100 hover:text-black'
