@@ -548,11 +548,34 @@ func (s *QuoteService) CreateContactInquiry(input *models.ContactInquiryInput) (
 	if name == "" {
 		return nil, fmt.Errorf("name is required")
 	}
+	if len(name) > 150 {
+		name = name[:150]
+	}
+	if len(company) > 150 {
+		company = company[:150]
+	}
 	if email == "" && phone == "" {
 		return nil, fmt.Errorf("either phone number or email is required")
 	}
+	if email != "" {
+		if _, err := mail.ParseAddress(email); err != nil || !strings.Contains(email, ".") {
+			return nil, fmt.Errorf("invalid email address format")
+		}
+		if len(email) > 150 {
+			email = email[:150]
+		}
+	}
+	if len(phone) > 40 {
+		phone = phone[:40]
+	}
+	if len(inquiryType) > 80 {
+		inquiryType = inquiryType[:80]
+	}
 	if message == "" {
 		return nil, fmt.Errorf("message is required")
+	}
+	if len(message) > 2000 {
+		message = message[:2000]
 	}
 
 	fullName := name

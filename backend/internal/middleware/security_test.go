@@ -33,6 +33,9 @@ func TestSecurityHeadersMiddleware(t *testing.T) {
 	if val := rr.Header().Get("Content-Security-Policy"); val == "" {
 		t.Errorf("expected Content-Security-Policy header, got empty")
 	}
+	if val := rr.Header().Get("Strict-Transport-Security"); val == "" {
+		t.Errorf("expected Strict-Transport-Security header, got empty")
+	}
 }
 
 func TestRecoveryMiddleware(t *testing.T) {
@@ -93,6 +96,15 @@ func TestAdminAuthMiddleware_Security(t *testing.T) {
 	authMw.ServeHTTP(rr4, req4)
 	if rr4.Code != http.StatusUnauthorized {
 		t.Fatalf("expected status 401 for token in query parameter, got %d", rr4.Code)
+	}
+
+	// Case 5: Default dev token must be rejected when custom secret is set (Backdoor defense)
+	req5 := httptest.NewRequest(http.MethodGet, "/api/admin/stats", nil)
+	req5.Header.Set("Authorization", "Bearer kadianga-admin-2026")
+	rr5 := httptest.NewRecorder()
+	authMw.ServeHTTP(rr5, req5)
+	if rr5.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status 401 for dev fallback token when custom production secret is set, got %d", rr5.Code)
 	}
 }
 

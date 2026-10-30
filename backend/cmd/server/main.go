@@ -45,7 +45,7 @@ func main() {
 
 	// Rate Limiters
 	globalLimiter := middleware.NewIPRateLimiter(180, 40) // 180 req/min, burst 40
-	quoteLimiter := middleware.NewIPRateLimiter(20, 5)    // 20 quotes/min, burst 5
+	quoteLimiter := middleware.NewIPRateLimiter(10, 4)    // 10 quotes/min, burst 4
 	adminLoginLimiter := middleware.NewIPRateLimiter(8, 3) // 8 auth verify attempts/min, burst 3 (brute-force defense)
 
 	// Router setup using standard net/http multiplexer
@@ -126,7 +126,7 @@ func main() {
 	mux.Handle("/api/quotes/sync", quoteSyncHandler)
 
 	// Public Contact Inquiry Route (Rate-limited, logged to Admin Dashboard)
-	contactLimiter := middleware.NewIPRateLimiter(20, 5)
+	contactLimiter := middleware.NewIPRateLimiter(6, 2)
 	contactHandler := middleware.RateLimitMiddleware(contactLimiter)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			handler.HandleContactSubmission(w, r)
@@ -223,6 +223,13 @@ func main() {
 
 			cleanPath := filepath.Clean(r.URL.Path)
 			filePath := filepath.Join(frontendDir, cleanPath)
+
+			// Path traversal defense: ensure resolved filePath is strictly contained within frontendDir
+			rel, err := filepath.Rel(frontendDir, filePath)
+			if err != nil || strings.HasPrefix(rel, "..") || strings.Contains(rel, "..") {
+				http.NotFound(w, r)
+				return
+			}
 
 			stat, err := os.Stat(filePath)
 			if err == nil && !stat.IsDir() {

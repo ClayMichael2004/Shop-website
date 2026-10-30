@@ -84,6 +84,11 @@ func (s *MediaService) UploadBase64(dataURL string) (string, error) {
 		return "", fmt.Errorf("failed to decode base64 image: %w", err)
 	}
 
+	detectedMime := http.DetectContentType(data)
+	if !strings.HasPrefix(detectedMime, "image/") || detectedMime == "image/svg+xml" {
+		return "", fmt.Errorf("decoded base64 content is not a supported raster image")
+	}
+
 	randomHex := make([]byte, 4)
 	cryptorand.Read(randomHex)
 	newFilename := fmt.Sprintf("prod_%d_%x%s", time.Now().Unix(), randomHex, ext)

@@ -403,33 +403,24 @@ func (h *APIHandler) AdminUploadImage(w http.ResponseWriter, r *http.Request) {
 	buf := make([]byte, 512)
 	n, _ := file.Read(buf)
 	contentType := http.DetectContentType(buf[:n])
-	if !strings.HasPrefix(contentType, "image/") {
-		respondError(w, http.StatusBadRequest, "File content is not a valid image")
-		return
+
+	// Strict allowlist of safe raster image MIME types (Disallowing SVG/HTML/executable polyglots to prevent stored XSS)
+	allowedMimes := map[string]string{
+		"image/jpeg": ".jpg",
+		"image/png":  ".png",
+		"image/webp": ".webp",
+		"image/gif":  ".gif",
 	}
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to read image stream")
+
+	ext, isAllowed := allowedMimes[contentType]
+	if !isAllowed {
+		respondError(w, http.StatusBadRequest, "Invalid image format. Only JPEG, PNG, WEBP, and GIF images are permitted.")
 		return
 	}
 
-	ext := strings.ToLower(filepath.Ext(header.Filename))
-	if ext == ".jfif" {
-		ext = ".jpg"
-	}
-	if ext == "" || (ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" && ext != ".gif") {
-		switch contentType {
-		case "image/jpeg":
-			ext = ".jpg"
-		case "image/png":
-			ext = ".png"
-		case "image/webp":
-			ext = ".webp"
-		case "image/gif":
-			ext = ".gif"
-		default:
-			respondError(w, http.StatusBadRequest, "Unsupported image format. Allowed: .jpg, .png, .webp, .gif")
-			return
-		}
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to read image stream")
+		return
 	}
 
 	randomHex := make([]byte, 4)

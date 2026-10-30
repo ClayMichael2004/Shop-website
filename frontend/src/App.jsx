@@ -73,8 +73,20 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [adminAuth, setAdminAuth] = useState(() => {
     try {
-      const saved = localStorage.getItem('kadianga_admin_auth') || localStorage.getItem('voltcraft_admin_auth');
-      return saved ? JSON.parse(saved) : null;
+      const savedStr = localStorage.getItem('kadianga_admin_auth') || localStorage.getItem('voltcraft_admin_auth');
+      if (!savedStr) return null;
+      const saved = JSON.parse(savedStr);
+      // OWASP Session Expiry Defense: Max session duration 12 hours
+      const MAX_SESSION_MS = 12 * 60 * 60 * 1000;
+      if (saved && saved.loggedInAt) {
+        const sessionAge = Date.now() - new Date(saved.loggedInAt).getTime();
+        if (sessionAge > MAX_SESSION_MS || isNaN(sessionAge)) {
+          localStorage.removeItem('kadianga_admin_auth');
+          localStorage.removeItem('voltcraft_admin_auth');
+          return null;
+        }
+      }
+      return saved;
     } catch {
       return null;
     }
