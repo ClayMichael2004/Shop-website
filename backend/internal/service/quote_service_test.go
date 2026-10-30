@@ -14,7 +14,7 @@ func setupTestDB(t *testing.T) (*database.DB, func()) {
 	testDBPath := "./test_shop.db"
 	_ = os.Remove(testDBPath)
 
-	db, err := database.InitDB(testDBPath)
+	db, err := database.InitDB("", testDBPath)
 	if err != nil {
 		t.Fatalf("failed to init test db: %v", err)
 	}

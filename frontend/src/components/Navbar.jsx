@@ -5,6 +5,7 @@ export default function Navbar({
   cartCount = 0, 
   onOpenCart, 
   onOpenTrackQuote,
+  onOpenStaffLogin,
   activeSection = 'home',
   activeCategory = null,
   onNavigate,
@@ -54,7 +55,9 @@ export default function Navbar({
         {/* Left: Brand Logo pinned to the far left corner */}
         <div 
           onClick={() => handleNavClick('home')} 
+          onDoubleClick={() => onOpenStaffLogin && onOpenStaffLogin()}
           className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none shrink-0"
+          title="Kadianga Electricals"
         >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#18181b] group-hover:bg-[#e67e22] flex items-center justify-center text-white font-bold text-xs sm:text-sm tracking-wider transition-colors shadow-sm shrink-0">
             KE

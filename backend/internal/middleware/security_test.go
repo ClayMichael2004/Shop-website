@@ -117,3 +117,30 @@ func TestRateLimiter_ExtractIP_SpoofDefense(t *testing.T) {
 		t.Fatalf("expected extractIP to respect X-Forwarded-For from trusted local proxy, got %s", ipLocal)
 	}
 }
+
+func TestAdminRateLimiter_BruteForceProtection(t *testing.T) {
+	limiter := NewIPRateLimiter(6, 3) // 3 burst allowed
+	handler := RateLimitMiddleware(limiter)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	}))
+
+	for i := 0; i < 3; i++ {
+		req := httptest.NewRequest(http.MethodGet, "/api/admin/verify", nil)
+		req.RemoteAddr = "192.0.2.10:12345"
+		rr := httptest.NewRecorder()
+		handler.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("expected call %d to succeed within burst limit, got %d", i+1, rr.Code)
+		}
+	}
+
+	// 4th rapid attempt must be rejected with 429
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/verify", nil)
+	req.RemoteAddr = "192.0.2.10:12345"
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected call 4 to be rejected with 429 Too Many Requests, got %d", rr.Code)
+	}
+}

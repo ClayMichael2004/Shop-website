@@ -46,6 +46,7 @@ func main() {
 	// Rate Limiters
 	globalLimiter := middleware.NewIPRateLimiter(180, 40) // 180 req/min, burst 40
 	quoteLimiter := middleware.NewIPRateLimiter(20, 5)    // 20 quotes/min, burst 5
+	adminLoginLimiter := middleware.NewIPRateLimiter(8, 3) // 8 auth verify attempts/min, burst 3 (brute-force defense)
 
 	// Router setup using standard net/http multiplexer
 	mux := http.NewServeMux()
@@ -138,13 +139,18 @@ func main() {
 	// Admin Routes (Protected with AdminAuthMiddleware)
 	adminAuth := middleware.AdminAuthMiddleware(cfg.AdminToken)
 
-	adminMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path
-
-		if path == "/api/admin/verify" && r.Method == http.MethodGet {
+	// Admin Verification Endpoint (Hardened with dedicated brute-force rate limiter)
+	verifyHandler := middleware.RateLimitMiddleware(adminLoginLimiter)(adminAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
 			handler.AdminVerify(w, r)
 			return
 		}
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	})))
+	mux.Handle("/api/admin/verify", verifyHandler)
+
+	adminMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
 
 		if path == "/api/admin/upload" && r.Method == http.MethodPost {
 			handler.AdminUploadImage(w, r)

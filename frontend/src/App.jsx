@@ -13,11 +13,13 @@ import Footer from './components/Footer';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorPage from './components/ErrorPage';
 import ErrorBoundary from './components/ErrorBoundary';
-import AdminPortal from './components/AdminPortal';
-import AdminLogin from './components/AdminLogin';
 import TrackQuoteModal from './components/TrackQuoteModal';
 import CookieConsent from './components/CookieConsent';
 import PrivacyTermsModal from './components/PrivacyTermsModal';
+
+// Code-splitting: lazy load Admin bundles to isolate from standard customer bundles
+const AdminPortal = React.lazy(() => import('./components/AdminPortal'));
+const AdminLogin = React.lazy(() => import('./components/AdminLogin'));
 import { 
   cacheProductsOffline, 
   getCachedProductsOffline, 
@@ -57,6 +59,17 @@ export default function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [activeSection, setActiveSection] = useState(getInitialSection);
   const [isAdminRoute, setIsAdminRoute] = useState(checkIsAdminPath);
+  const [isStaffLoginOpen, setIsStaffLoginOpen] = useState(() => {
+    if (checkIsAdminPath()) {
+      try {
+        const saved = localStorage.getItem('kadianga_admin_auth') || localStorage.getItem('voltcraft_admin_auth');
+        return !saved;
+      } catch {
+        return true;
+      }
+    }
+    return false;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [adminAuth, setAdminAuth] = useState(() => {
     try {
@@ -491,7 +504,11 @@ export default function App() {
       console.warn('Local storage write failed:', e);
     }
     setAdminAuth(authData);
+    setIsStaffLoginOpen(false);
     setIsAdminRoute(true);
+    try {
+      window.history.pushState({ section: 'admin' }, '', '/admin');
+    } catch (e) {}
     loadCatalog();
   };
 
@@ -503,6 +520,11 @@ export default function App() {
       console.warn('Local storage clear failed:', e);
     }
     setAdminAuth(null);
+    setIsAdminRoute(false);
+    setIsStaffLoginOpen(false);
+    try {
+      window.history.pushState({}, '', '/');
+    } catch (e) {}
     loadCatalog();
   };
 
@@ -511,18 +533,36 @@ export default function App() {
       window.history.pushState({}, '', '/');
     } catch (e) {}
     setIsAdminRoute(false);
+    setIsStaffLoginOpen(false);
     loadCatalog();
   };
 
   // Initialize Cart, Catalog and Route listeners
   useEffect(() => {
     const handleUrlRoute = () => {
-      setIsAdminRoute(checkIsAdminPath());
+      const isAdmin = checkIsAdminPath();
+      setIsAdminRoute(isAdmin);
+      if (isAdmin && !adminAuth) {
+        setIsStaffLoginOpen(true);
+      }
       setActiveSection(getInitialSection());
     };
 
     window.addEventListener('popstate', handleUrlRoute);
     window.addEventListener('hashchange', handleUrlRoute);
+
+    // Global keyboard shortcut to open staff login: Ctrl+Shift+A or Cmd+Shift+A
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        if (adminAuth) {
+          setIsAdminRoute(prev => !prev);
+        } else {
+          setIsStaffLoginOpen(prev => !prev);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
 
     // 1. Load cart from offline local storage
     const savedCart = getCartOffline();
@@ -570,6 +610,7 @@ export default function App() {
     return () => {
       window.removeEventListener('popstate', handleUrlRoute);
       window.removeEventListener('hashchange', handleUrlRoute);
+      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -685,26 +726,26 @@ export default function App() {
     );
   }
 
-  // Dedicated Admin Endpoint Mode (/admin, /admin/login, #admin, ?admin)
-  if (isAdminRoute) {
-    if (adminAuth) {
-      return (
-        <ErrorBoundary onReset={handleExitAdmin}>
+  // Dedicated Admin Endpoint Mode (/admin, /admin/login, #admin, ?admin) - active when authenticated
+  if (isAdminRoute && adminAuth) {
+    return (
+      <ErrorBoundary onReset={handleExitAdmin}>
+        <React.Suspense fallback={
+          <div className="min-h-screen w-full flex items-center justify-center bg-[#faf9f6]">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-4 border-neutral-300 border-t-[#e67e22] rounded-full animate-spin"></div>
+              <p className="text-xs uppercase tracking-widest text-neutral-600 font-bold">Loading Staff Portal...</p>
+            </div>
+          </div>
+        }>
           <AdminPortal
             apiBase={API_BASE}
             adminToken={adminAuth?.token || ""}
             onExit={handleExitAdmin}
             onLogout={handleAdminLogout}
           />
-        </ErrorBoundary>
-      );
-    }
-    return (
-      <AdminLogin
-        onLoginSuccess={handleAdminLoginSuccess}
-        onCancel={handleExitAdmin}
-        defaultEmail="admin@kadianga.store"
-      />
+        </React.Suspense>
+      </ErrorBoundary>
     );
   }
 
@@ -738,6 +779,16 @@ export default function App() {
         onOpenTrackQuote={() => {
           setTrackQuotePrefill('');
           setIsTrackQuoteOpen(true);
+        }}
+        onOpenStaffLogin={() => {
+          if (adminAuth) {
+            setIsAdminRoute(true);
+            try {
+              window.history.pushState({ section: 'admin' }, '', '/admin');
+            } catch (e) {}
+          } else {
+            setIsStaffLoginOpen(true);
+          }
         }}
         activeSection={activeSection}
         activeCategory={selectedCategory}
@@ -816,6 +867,16 @@ export default function App() {
           setIsTrackQuoteOpen(true);
         }}
         onOpenPrivacyTerms={() => setIsPrivacyTermsOpen(true)}
+        onOpenStaffLogin={() => {
+          if (adminAuth) {
+            setIsAdminRoute(true);
+            try {
+              window.history.pushState({ section: 'admin' }, '', '/admin');
+            } catch (e) {}
+          } else {
+            setIsStaffLoginOpen(true);
+          }
+        }}
       />
 
       {/* Product Detail Modal (Alibaba / Amazon style) */}
@@ -877,6 +938,23 @@ export default function App() {
       <CookieConsent
         onOpenPrivacyTerms={() => setIsPrivacyTermsOpen(true)}
       />
+
+      {/* Centered Staff Login Modal (Lazy Loaded: Zero Admin Code in Customer Initial Bundle) */}
+      {isStaffLoginOpen && (
+        <React.Suspense fallback={null}>
+          <AdminLogin
+            onLoginSuccess={handleAdminLoginSuccess}
+            onCancel={() => {
+              setIsStaffLoginOpen(false);
+              setIsAdminRoute(false);
+              try {
+                window.history.pushState({}, '', '/');
+              } catch (e) {}
+            }}
+            defaultEmail="admin@kadianga.store"
+          />
+        </React.Suspense>
+      )}
 
       {/* Floating Instant Toast Notification when Quick-Adding to Cart */}
       {cartToast && (

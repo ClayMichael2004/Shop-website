@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, Phone, MessageCircle, Mail } from 'lucide-react';
+import { ArrowUpRight, Phone, MessageCircle, Mail, Lock } from 'lucide-react';
 
-export default function Footer({ onNavigate, onOpenTrackQuote, onOpenPrivacyTerms }) {
+export default function Footer({ onNavigate, onOpenTrackQuote, onOpenPrivacyTerms, onOpenStaffLogin }) {
   const [timeStr, setTimeStr] = useState('1:24 PM');
 
   useEffect(() => {
@@ -191,6 +191,19 @@ export default function Footer({ onNavigate, onOpenTrackQuote, onOpenPrivacyTerm
             >
               Privacy &amp; Terms (KDPA)
             </button>
+          )}
+          {onOpenStaffLogin && (
+            <>
+              <span className="hidden sm:inline text-neutral-300">·</span>
+              <button 
+                onClick={onOpenStaffLogin} 
+                className="hover:text-neutral-900 transition-colors font-medium text-neutral-400 cursor-pointer inline-flex items-center gap-1 text-[11px]"
+                title="Staff Portal (Authorized Access)"
+              >
+                <Lock className="w-2.5 h-2.5 text-neutral-400" />
+                <span>Staff Access</span>
+              </button>
+            </>
           )}
         </div>
 
