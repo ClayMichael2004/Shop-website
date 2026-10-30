@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -390,9 +389,9 @@ func (h *APIHandler) AdminUploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, header, err := r.FormFile("image")
+	file, _, err := r.FormFile("image")
 	if err != nil {
-		file, header, err = r.FormFile("file")
+		file, _, err = r.FormFile("file")
 	}
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "No image file provided in form field 'image'")
